@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 def generate_dataset():
     f = open('s1.txt', 'w')
-    for idx in range(0, 10):
+    for idx in range(0, 4000):
         x1 = random.uniform(-1., 1.)
         x2 = random.uniform(-1., 1.)
         cat = 0
@@ -25,7 +25,15 @@ def generate_dataset():
 
 def plot_dataset():
     f = open("s1.txt", "r")
-    print(f.read().split(',')) 
+    color_map = {1. : 'g', 
+                 2. : 'm', 
+                 3. : 'b', 
+                 4. : 'r'}
+    
+    for line in f:
+        x1, x2, cat = [float(item) for item in line.strip().split(',')]
+        plt.scatter(x1, x2, c=color_map[cat], marker="+", linewidths=0.5)
+    plt.show()
 
 if __name__ == '__main__':
     generate_dataset()
