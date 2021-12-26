@@ -1,7 +1,12 @@
 import numpy as np
+from os.path import exists
 import matplotlib.pyplot as plt
 
 def plot_dataset(filename):
+    if not exists(filename):
+        print('{} does not exist.'.format(filename))
+        exit(-1)
+        
     color_map = {1. : 'g', 
                  2. : 'm', 
                  3. : 'b', 
