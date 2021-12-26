@@ -3,16 +3,11 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include "utility.h"
 
-#define RAND_LOW -1
-#define RAND_HIGH 1
+
 #define SET_SIZE 8000
 #define ERROR_PROPABILITY 0.1
-
-float generate_random_float() {
-	float scale = rand() / (float) RAND_MAX;
-	return RAND_LOW + scale * (RAND_HIGH - RAND_LOW);
-}
 
 int select_category(float x1, float x2) {
 	if (pow((x1 - 0.5), 2) + pow((x2 - 0.5), 2) < 0.16 ){
