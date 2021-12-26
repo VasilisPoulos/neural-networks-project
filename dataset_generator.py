@@ -1,4 +1,5 @@
 import random
+import numpy as np
 import matplotlib.pyplot as plt
 
 def generate_dataset():
@@ -24,17 +25,24 @@ def generate_dataset():
     f.close()
 
 def plot_dataset():
-    f = open("s1.txt", "r")
+    filename = "s1.txt"
     color_map = {1. : 'g', 
                  2. : 'm', 
                  3. : 'b', 
                  4. : 'r'}
     
-    for line in f:
-        x1, x2, cat = [float(item) for item in line.strip().split(',')]
-        plt.scatter(x1, x2, c=color_map[cat], marker="+", linewidths=0.5)
+    points = np.empty((0,3))
+    with open(filename) as f:
+        for line in f:
+            np_line = np.array([float(item) for item in line.strip().split(',')])
+            points = np.vstack([points, np_line])
+
+    plt.scatter(points[:,0], points[:,1], c=points[:,2],marker="+", linewidths=0.5)
     plt.show()
 
 if __name__ == '__main__':
     generate_dataset()
+    import time 
+    start_time = time.time()
     plot_dataset()
+    print('{}sec'.format(time.time() - start_time))
