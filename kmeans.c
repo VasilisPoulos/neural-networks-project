@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "utility.h"
 
 #define NUM_OF_CLUSTERS 4
@@ -36,24 +37,108 @@ int main()
     fclose(fp);
 
     printf("Lines of data: %d \n", len_of_dataset);
+    srand(time(NULL)); 
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
         Cluster cluster;
-
         int dataset_idx = generate_random_float(0, len_of_dataset - 1);
-        //printf("%d", dataset_idx);
-        //printf("%f, %f", dataset[dataset_idx][0], dataset[dataset_idx][1]);
         cluster.x = dataset[dataset_idx][0];
         cluster.y = dataset[dataset_idx][1];
         cluster.group = idx;
         cluster_list[idx] = cluster;
     }
-    
+
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
         printf("x: %f, y: %f, group: %d\n", cluster_list[idx].x, \
         cluster_list[idx].y, cluster_list[idx].group);
     }
+
+    float dx = 0;
+    float dy = 0;
+    int distance_from_cluster = -1;
+    float temp_centers[NUM_OF_CLUSTERS][3] = {0};
+    int cluster_num = 0;
+    for (size_t epoch = 0; epoch < 50; epoch++)
+    {
+        // Reset temp array.
+        for(int i = 0; i < NUM_OF_CLUSTERS; i++) {
+            for (int j = 0; j < 3; j++) {
+                temp_centers[i][j] = 0;  
+            }
+        }
+
+        // Calculating distances.
+        for (size_t idx = 0; idx < len_of_dataset; idx++)
+        {
+            dx = dataset[idx][0] - cluster_list[0].x;
+            dy = dataset[idx][1] - cluster_list[0].y;
+            dataset[idx][2] = 0;
+            distance_from_cluster = EUCLIDEAN(dx, dy);
+            for (size_t cluster_idx = 1; cluster_idx < NUM_OF_CLUSTERS; cluster_idx++)
+            {
+                dx = dataset[idx][0] - cluster_list[cluster_idx].x;
+                dy = dataset[idx][1] - cluster_list[cluster_idx].y;
+                if (distance_from_cluster > EUCLIDEAN(dx, dy))
+                {
+                    distance_from_cluster = EUCLIDEAN(dx, dy);
+                    dataset[idx][2] = cluster_idx;
+                }
+            }
+        }
+
+        // Changing cluster positions.
+        for (size_t idx = 0; idx < len_of_dataset; idx++)
+        {
+            cluster_num = (int) dataset[idx][2];
+            temp_centers[cluster_num][0] += dataset[idx][0];
+            temp_centers[cluster_num][1] += dataset[idx][1];
+            temp_centers[cluster_num][2] += 1;
+        }
+        printf("==\n");
+        for (size_t i = 0; i < NUM_OF_CLUSTERS; i++)
+        {
+            printf("%f, %f, %f \n", temp_centers[i][0], temp_centers[i][1],  temp_centers[i][2]);
+        }   
+        printf("\n");
+
+        for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+        {
+            if (!temp_centers[idx][2] == 0)
+            {
+                cluster_list[idx].x = temp_centers[idx][0] / temp_centers[idx][2];
+                cluster_list[idx].y = temp_centers[idx][1] / temp_centers[idx][2];
+            }
+        }
+       
+        for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+        {
+            printf("x: %f, y: %f, group: %d\n", cluster_list[idx].x, \
+            cluster_list[idx].y, cluster_list[idx].group);
+        }
+
+        // Check if clusters moved.
+
+    }
+
+    // for (size_t i = 0; i < len_of_dataset; i++)
+    // {
+    //     printf("%f, %f, %f\n", dataset[i][0], dataset[i][1], dataset[i][2]);  
+    // }
+
+    // for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    // {
+    //     printf("x: %f, y: %f, group: %d\n", cluster_list[idx].x, \
+    //     cluster_list[idx].y, cluster_list[idx].group);
+    // }
+
+    // // dealocate memory
+    // for (size_t idx = 0; idx < len_of_dataset; idx++)
+    // {
+    //     free(dataset[idx]);
+    // }
+    // free(dataset);
+
     return 0;
 }
 
@@ -71,11 +156,11 @@ float** read_file(char* filename) {
 
     num_of_lines = get_num_of_lines(fp);
 
-    float* values = calloc(num_of_lines*2, sizeof(float));
+    float* values = calloc(num_of_lines*3, sizeof(float));
     float** dataset = malloc(num_of_lines*sizeof(float*));
     for (int i=0; i< num_of_lines; ++i)
     {
-        dataset[i] = values + i*2;
+        dataset[i] = values + i*3;
     }
 
     for (size_t idx = 0; idx < num_of_lines; idx++)
@@ -84,6 +169,7 @@ float** read_file(char* filename) {
         coords = parse_line(line);
         dataset[idx][0] = coords[0];
         dataset[idx][1] = coords[1];
+        dataset[idx][2] = -1;
     }
 
     fclose(fp);
