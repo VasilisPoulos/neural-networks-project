@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from os.path import exists
 import matplotlib.pyplot as plt
@@ -30,4 +31,8 @@ def plot_dataset(filename, num_of_columns):
     plt.show()
 
 if __name__ == '__main__':
-    plot_dataset("dataset2.txt", 2)
+    if not len(sys.argv) > 2:
+        print('Use: python dataset_generator.py <filename> <num_of_columns>')
+        exit(0)
+
+    plot_dataset(sys.argv[1], int(sys.argv[2]))
