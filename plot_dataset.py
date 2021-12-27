@@ -31,8 +31,8 @@ def plot_dataset(filename, num_of_columns):
     plt.show()
 
 if __name__ == '__main__':
-    if not len(sys.argv) > 1:
-        print('Use: python dataset_generator.py <filename>')
+    if not len(sys.argv) > 2:
+        print('Use: python dataset_generator.py <filename> <num_of_columns>')
         exit(0)
 
-    plot_dataset(sys.argv[1], 2)
+    plot_dataset(sys.argv[1], int(sys.argv[2]))
