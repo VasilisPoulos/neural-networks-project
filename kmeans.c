@@ -36,6 +36,7 @@ int get_file_len(char* filename);
 void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset);
 void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
 int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
+float* error_calc(Cluster* cluster_list, float cluster_sum_info[NUM_OF_CLUSTERS][3],float** dataset, int len_of_dataset);
 
 int main()
 {  
@@ -68,6 +69,7 @@ int main()
     //print_tables(cluster_sum_info, cluster_list, -1);
     write_labeled_dataset_to_file("labeled_data.txt", dataset, len_dataset);
     write_kmeans_clusters_to_file("kmeans_clusters.txt", cluster_list);
+    error_calc(cluster_list,cluster_sum_info,dataset,len_dataset);
     free(dataset);
     return 0;
 }
@@ -270,4 +272,25 @@ int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLU
     }
     return 1;
     
+}
+
+float* error_calc(Cluster* cluster_list, float cluster_sum_info[NUM_OF_CLUSTERS][3],float** dataset, int len_of_dataset){
+    float category_sum[NUM_OF_CLUSTERS];
+    Cluster cluster;
+
+    for(int x = 0; x < NUM_OF_CLUSTERS; x++)
+    {
+        category_sum[x] = 0.0;
+    }
+    
+    for (size_t idx = 0; idx < len_of_dataset; idx++) 
+    {
+        int pos = dataset[idx][2];
+        float dx = dataset[idx][0]; 
+        float dy = dataset[idx][1];
+        float distance_from_cluster = EUCLIDEAN(dx, dy);
+        category_sum[pos] += pow((distance_from_cluster - cluster_sum_info[pos][3]),2);
+        printf("Error: %f at cluster %d. For center %f and distance from claster %f\n",category_sum[pos],pos,cluster_sum_info[pos][3],distance_from_cluster);
+    }
+    return category_sum;
 }
