@@ -192,23 +192,24 @@ void set_labels(float** dataset, int len_of_dataset){
     float dy = 0;
     int distance_from_cluster = -1;
     for (size_t idx = 0; idx < len_of_dataset; idx++)
+    {
+        dx = dataset[idx][0] - cluster_list[0].x;
+        dy = dataset[idx][1] - cluster_list[0].y;
+        dataset[idx][2] = 0;
+        distance_from_cluster = EUCLIDEAN(dx, dy);
+        for (size_t cluster_idx = 1; cluster_idx < NUM_OF_CLUSTERS; cluster_idx++)
         {
-            dx = dataset[idx][0] - cluster_list[0].x;
-            dy = dataset[idx][1] - cluster_list[0].y;
-            dataset[idx][2] = 0;
-            distance_from_cluster = EUCLIDEAN(dx, dy);
-            for (size_t cluster_idx = 1; cluster_idx < NUM_OF_CLUSTERS; cluster_idx++)
+            dx = dataset[idx][0] - cluster_list[cluster_idx].x;
+            dy = dataset[idx][1] - cluster_list[cluster_idx].y;
+            if (distance_from_cluster > EUCLIDEAN(dx, dy))
             {
-                dx = dataset[idx][0] - cluster_list[cluster_idx].x;
-                dy = dataset[idx][1] - cluster_list[cluster_idx].y;
-                if (distance_from_cluster > EUCLIDEAN(dx, dy))
-                {
-                    distance_from_cluster = EUCLIDEAN(dx, dy);
-                    dataset[idx][2] = cluster_idx;
-                }
+                distance_from_cluster = EUCLIDEAN(dx, dy);
+                dataset[idx][2] = cluster_idx;
             }
         }
-        
+    }
+}
+    
 void reset_array(float array[NUM_OF_CLUSTERS][3]){
     for(int i = 0; i < NUM_OF_CLUSTERS; i++) {
         for (int j = 0; j < 3; j++) {
