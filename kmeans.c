@@ -9,7 +9,7 @@
 // When comparing distances we can omit the square root of the euclidean 
 // distance function and we can make it into a macro so we don'thave to pay for 
 // function call overhead.
-#define EUCLIDEAN(dx,dy) (dx*dx)+(dy*dy) 
+#define EUCLIDEAN(dx,dy) sqrt((dx*dx)+(dy*dy))
 #define LEN_2D(x)  (sizeof(x[0]) / sizeof(x[0][0]))
 
 typedef struct {
@@ -26,15 +26,16 @@ int get_num_of_lines(FILE *fp);
 void set_labels(float** dataset, int len_of_dataset);
 void reset_array(float array[NUM_OF_CLUSTERS][3]);
 void reposition_cluster_centers(float** dataset, \
-    float temp_centers[NUM_OF_CLUSTERS][3], \
+    float cluster_sum_info[NUM_OF_CLUSTERS][3], \
     Cluster* cluster_list, int len_of_dataset);
 void intialize_clusters(Cluster* cluster_list, float** dataset, \
     int len_of_dataset);
-void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list, \
+void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_list, \
     int epoch);
 int get_file_len(char* filename);
 void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset);
 void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
+int check_cluster_movement(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
 
 int main()
 {  
@@ -44,18 +45,27 @@ int main()
     int len_dataset = get_file_len(filename);
     printf("Lines of data: %d \n", len_dataset);
   
-    float temp_centers[NUM_OF_CLUSTERS][3] = {0};
+    float previous_clusters[NUM_OF_CLUSTERS][2] = {0};
+    float cluster_sum_info[NUM_OF_CLUSTERS][3] = {0};
     intialize_clusters(cluster_list, dataset, len_dataset);
-    print_tables(temp_centers, cluster_list, 0);
-    for (size_t epoch = 0; epoch < 1000; epoch++)
+    //print_tables(cluster_sum_info, cluster_list, -1);
+    for (size_t epoch = 0; epoch < 50; epoch++)
     {
-        reset_array(temp_centers);
+        reset_array(cluster_sum_info);
         set_labels(dataset, len_dataset);
-        reposition_cluster_centers(dataset, temp_centers, cluster_list, len_dataset);
+        reposition_cluster_centers(dataset, cluster_sum_info, cluster_list, len_dataset);
+        //print_tables(cluster_sum_info, cluster_list, epoch);
+        if(check_cluster_movement(cluster_list, previous_clusters) == 1){
+            break;
+        }
+        for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+        {
+            previous_clusters[idx][0] = cluster_list[idx].x;
+            previous_clusters[idx][1] =  cluster_list[idx].y;
+        }
         
-        //TODO: Check if clusters moved.
     }
-    print_tables(temp_centers, cluster_list, -1);
+    //print_tables(cluster_sum_info, cluster_list, -1);
     write_labeled_dataset_to_file("labeled_data.txt", dataset, len_dataset);
     write_kmeans_clusters_to_file("kmeans_clusters.txt", cluster_list);
     free(dataset);
@@ -131,20 +141,23 @@ int get_num_of_lines(FILE *fp){
 void set_labels(float** dataset, int len_of_dataset){
     float dx = 0;
     float dy = 0;
-    int distance_from_cluster = -1;
+    float min_distance = 0;
     for (size_t idx = 0; idx < len_of_dataset; idx++)
     {
         dx = dataset[idx][0] - cluster_list[0].x;
         dy = dataset[idx][1] - cluster_list[0].y;
+        min_distance = EUCLIDEAN(dx, dy);
         dataset[idx][2] = 0;
-        distance_from_cluster = EUCLIDEAN(dx, dy);
-        for (size_t cluster_idx = 1; cluster_idx < NUM_OF_CLUSTERS; cluster_idx++)
+        for (size_t cluster_idx = 0; cluster_idx < NUM_OF_CLUSTERS; cluster_idx++)
         {
             dx = dataset[idx][0] - cluster_list[cluster_idx].x;
             dy = dataset[idx][1] - cluster_list[cluster_idx].y;
-            if (distance_from_cluster > EUCLIDEAN(dx, dy))
+            if (min_distance > EUCLIDEAN(dx, dy))
             {
-                distance_from_cluster = EUCLIDEAN(dx, dy);
+                // printf("Changed %f, %f g:%f -> g:%ld \n min: %f -> %f\n", \
+                // dataset[idx][0], dataset[idx][1], dataset[idx][2], cluster_idx,\
+                // min_distance, EUCLIDEAN(dx, dy));
+                min_distance = EUCLIDEAN(dx, dy);
                 dataset[idx][2] = cluster_idx;
             }
         }
@@ -160,28 +173,28 @@ void reset_array(float array[NUM_OF_CLUSTERS][3]){
 }
 
 void reposition_cluster_centers(float** dataset, \
-    float temp_centers[NUM_OF_CLUSTERS][3], \
+    float cluster_sum_info[NUM_OF_CLUSTERS][3], \
     Cluster* cluster_list, int len_of_dataset){
     int cluster_num = 0;
     for (size_t idx = 0; idx < len_of_dataset; idx++)
     {
         cluster_num = (int) dataset[idx][2];
-        temp_centers[cluster_num][0] += dataset[idx][0];
-        temp_centers[cluster_num][1] += dataset[idx][1];
-        temp_centers[cluster_num][2] += 1;
+        cluster_sum_info[cluster_num][0] += dataset[idx][0];
+        cluster_sum_info[cluster_num][1] += dataset[idx][1];
+        cluster_sum_info[cluster_num][2] += 1;
     }
     
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
-        if (!temp_centers[idx][2] == 0)
+        if (!cluster_sum_info[idx][2] == 0)
         {
-            cluster_list[idx].x = temp_centers[idx][0] / temp_centers[idx][2];
-            cluster_list[idx].y = temp_centers[idx][1] / temp_centers[idx][2];
+            cluster_list[idx].x = cluster_sum_info[idx][0] / cluster_sum_info[idx][2];
+            cluster_list[idx].y = cluster_sum_info[idx][1] / cluster_sum_info[idx][2];
         }
     }
 }
 
-void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list, int epoch){
+void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_list, int epoch){
     printf("%d =================================\n", epoch);
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
@@ -191,7 +204,7 @@ void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list,
     printf("\n");
     for (size_t i = 0; i < NUM_OF_CLUSTERS; i++)
     {
-        printf("%f, %f, %f \n", temp_centers[i][0], temp_centers[i][1],  temp_centers[i][2]);
+        printf("%f, %f, %f \n", cluster_sum_info[i][0], cluster_sum_info[i][1],  cluster_sum_info[i][2]);
     } 
     printf("\n\n");
 }
@@ -235,4 +248,18 @@ void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list){
         fprintf(fp, "%f, %f, %d\n", cluster_list[idx].x, cluster_list[idx].y, cluster_list[idx].group);
     }
     fclose(fp);
+}
+
+int check_cluster_movement(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]){
+
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        if (cluster_list[idx].x == previous_clusters[idx][0] && 
+            cluster_list[idx].y == previous_clusters[idx][1])
+        {
+            return 1;
+        }
+        return 0;
+    }
+    
 }

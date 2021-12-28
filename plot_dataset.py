@@ -26,7 +26,7 @@ def plot_dataset(filename, num_of_columns):
             point_colors = np.append(point_colors, color_map[item])
 
         plt.scatter(points[:,0], points[:,1], c=point_colors, marker="+", \
-            linewidths=0.5)
+            linewidths=1)
     else:
         plt.scatter(points[:,0], points[:,1], marker="+", linewidths=0.5)
     plt.show()
