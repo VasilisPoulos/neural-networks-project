@@ -23,6 +23,7 @@ Cluster cluster_list[NUM_OF_CLUSTERS];
 float** read_file(char* filename);
 float* parse_line(char* line);
 int get_num_of_lines(FILE *fp);
+void set_labels(float** dataset, int len_of_dataset);
 
 int main()
 {  
@@ -54,9 +55,6 @@ int main()
         cluster_list[idx].y, cluster_list[idx].group);
     }
 
-    float dx = 0;
-    float dy = 0;
-    int distance_from_cluster = -1;
     float temp_centers[NUM_OF_CLUSTERS][3] = {0};
     int cluster_num = 0;
     for (size_t epoch = 0; epoch < 50; epoch++)
@@ -69,23 +67,7 @@ int main()
         }
 
         // Calculating distances.
-        for (size_t idx = 0; idx < len_of_dataset; idx++)
-        {
-            dx = dataset[idx][0] - cluster_list[0].x;
-            dy = dataset[idx][1] - cluster_list[0].y;
-            dataset[idx][2] = 0;
-            distance_from_cluster = EUCLIDEAN(dx, dy);
-            for (size_t cluster_idx = 1; cluster_idx < NUM_OF_CLUSTERS; cluster_idx++)
-            {
-                dx = dataset[idx][0] - cluster_list[cluster_idx].x;
-                dy = dataset[idx][1] - cluster_list[cluster_idx].y;
-                if (distance_from_cluster > EUCLIDEAN(dx, dy))
-                {
-                    distance_from_cluster = EUCLIDEAN(dx, dy);
-                    dataset[idx][2] = cluster_idx;
-                }
-            }
-        }
+        set_labels(dataset, len_of_dataset);
 
         // Changing cluster positions.
         for (size_t idx = 0; idx < len_of_dataset; idx++)
@@ -206,4 +188,27 @@ int get_num_of_lines(FILE *fp){
     }
     fseek(fp, 0L, SEEK_SET);
     return lines;
+}
+
+void set_labels(float** dataset, int len_of_dataset){
+    float dx = 0;
+    float dy = 0;
+    int distance_from_cluster = -1;
+    for (size_t idx = 0; idx < len_of_dataset; idx++)
+        {
+            dx = dataset[idx][0] - cluster_list[0].x;
+            dy = dataset[idx][1] - cluster_list[0].y;
+            dataset[idx][2] = 0;
+            distance_from_cluster = EUCLIDEAN(dx, dy);
+            for (size_t cluster_idx = 1; cluster_idx < NUM_OF_CLUSTERS; cluster_idx++)
+            {
+                dx = dataset[idx][0] - cluster_list[cluster_idx].x;
+                dy = dataset[idx][1] - cluster_list[cluster_idx].y;
+                if (distance_from_cluster > EUCLIDEAN(dx, dy))
+                {
+                    distance_from_cluster = EUCLIDEAN(dx, dy);
+                    dataset[idx][2] = cluster_idx;
+                }
+            }
+        }
 }
