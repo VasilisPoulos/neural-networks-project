@@ -8,7 +8,8 @@ def plot_dataset(filename, num_of_columns):
         print('{} does not exist.'.format(filename))
         exit(-1)
         
-    color_map = {1. : 'g', 
+    color_map = {0. : 'y',
+                 1. : 'g', 
                  2. : 'm', 
                  3. : 'b', 
                  4. : 'r'}
@@ -30,9 +31,22 @@ def plot_dataset(filename, num_of_columns):
         plt.scatter(points[:,0], points[:,1], marker="+", linewidths=0.5)
     plt.show()
 
+def plot_clusters(filename):
+    if not exists(filename):
+        print('{} does not exist.'.format(filename))
+        exit(-1)
+    points = np.empty((0, 3))
+    with open(filename) as f:
+        for line in f:
+            np_line = np.array([float(item) for item in line.strip().split(',')])
+            points = np.vstack([points, np_line])
+    plt.scatter(points[:,0], points[:,1])
+    
 if __name__ == '__main__':
     if not len(sys.argv) > 2:
-        print('Use: python dataset_generator.py <filename> <num_of_columns>')
+        print('Use: python dataset_generator.py <filename> <num_of_columns> <kmeans_clusters>')
         exit(0)
 
+    if len(sys.argv) > 3:
+        plot_clusters(sys.argv[3])
     plot_dataset(sys.argv[1], int(sys.argv[2]))

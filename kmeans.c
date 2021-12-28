@@ -33,26 +33,31 @@ void intialize_clusters(Cluster* cluster_list, float** dataset, \
 void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list, \
     int epoch);
 int get_file_len(char* filename);
+void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset);
+void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
 
 int main()
 {  
     char* filename = "dataset2.txt";
     float** dataset;
-    dataset = read_file(filename);
-    int len_of_dataset = get_file_len(filename);
-    printf("Lines of data: %d \n", len_of_dataset);
+    dataset = read_file("dataset2.txt");
+    int len_dataset = get_file_len(filename);
+    printf("Lines of data: %d \n", len_dataset);
   
     float temp_centers[NUM_OF_CLUSTERS][3] = {0};
-    intialize_clusters(cluster_list, dataset, len_of_dataset);
+    intialize_clusters(cluster_list, dataset, len_dataset);
     print_tables(temp_centers, cluster_list, 0);
-    for (size_t epoch = 0; epoch < 50; epoch++)
+    for (size_t epoch = 0; epoch < 1000; epoch++)
     {
         reset_array(temp_centers);
-        set_labels(dataset, len_of_dataset);
-        reposition_cluster_centers(dataset, temp_centers, cluster_list, len_of_dataset);
-        print_tables(temp_centers, cluster_list, epoch);
+        set_labels(dataset, len_dataset);
+        reposition_cluster_centers(dataset, temp_centers, cluster_list, len_dataset);
+        
         //TODO: Check if clusters moved.
     }
+    print_tables(temp_centers, cluster_list, -1);
+    write_labeled_dataset_to_file("labeled_data.txt", dataset, len_dataset);
+    write_kmeans_clusters_to_file("kmeans_clusters.txt", cluster_list);
     free(dataset);
     return 0;
 }
@@ -210,4 +215,24 @@ int get_file_len(char* filename){
     int len_of_dataset = get_num_of_lines(fp);
     fclose(fp);
     return len_of_dataset;
+}
+
+void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset){
+    FILE * fp;
+    fp = fopen(filename, "w");
+    for (size_t idx = 0; idx < len_dataset; idx++)
+    {
+        fprintf(fp, "%f, %f, %f\n", dataset[idx][0], dataset[idx][1], dataset[idx][2]);
+    }
+    fclose(fp);
+}
+
+void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list){
+    FILE * fp;
+    fp = fopen(filename, "w");
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        fprintf(fp, "%f, %f, %d\n", cluster_list[idx].x, cluster_list[idx].y, cluster_list[idx].group);
+    }
+    fclose(fp);
 }
