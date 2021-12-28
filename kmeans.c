@@ -24,6 +24,7 @@ float** read_file(char* filename);
 float* parse_line(char* line);
 int get_num_of_lines(FILE *fp);
 void set_labels(float** dataset, int len_of_dataset);
+void reset_array(float array[NUM_OF_CLUSTERS][3]);
 
 int main()
 {  
@@ -60,11 +61,7 @@ int main()
     for (size_t epoch = 0; epoch < 50; epoch++)
     {
         // Reset temp array.
-        for(int i = 0; i < NUM_OF_CLUSTERS; i++) {
-            for (int j = 0; j < 3; j++) {
-                temp_centers[i][j] = 0;  
-            }
-        }
+        reset_array(temp_centers);
 
         // Calculating distances.
         set_labels(dataset, len_of_dataset);
@@ -114,7 +111,7 @@ int main()
     //     cluster_list[idx].y, cluster_list[idx].group);
     // }
 
-    // // dealocate memory
+    // dealocate memory
     // for (size_t idx = 0; idx < len_of_dataset; idx++)
     // {
     //     free(dataset[idx]);
@@ -211,4 +208,11 @@ void set_labels(float** dataset, int len_of_dataset){
                 }
             }
         }
+        
+void reset_array(float array[NUM_OF_CLUSTERS][3]){
+    for(int i = 0; i < NUM_OF_CLUSTERS; i++) {
+        for (int j = 0; j < 3; j++) {
+            array[i][j] = 0;  
+        }
+    }
 }
