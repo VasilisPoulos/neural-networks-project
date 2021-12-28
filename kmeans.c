@@ -130,11 +130,7 @@ int main()
     // }
 
     // dealocate memory
-    // for (size_t idx = 0; idx < len_of_dataset; idx++)
-    // {
-    //     free(dataset[idx]);
-    // }
-    // free(dataset);
+    free(dataset);
 
     return 0;
 }
