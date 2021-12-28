@@ -26,13 +26,14 @@ int get_num_of_lines(FILE *fp);
 void set_labels(float** dataset, int len_of_dataset);
 void reset_array(float array[NUM_OF_CLUSTERS][3]);
 void reposition_cluster_centers(float** dataset, \
-    float temp_centers[NUM_OF_CLUSTERS][3], \
+    float cluster_sum_info[NUM_OF_CLUSTERS][3], \
     Cluster* cluster_list, int len_of_dataset);
 void intialize_clusters(Cluster* cluster_list, float** dataset, \
     int len_of_dataset);
-void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list, \
+void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_list, \
     int epoch);
 int get_file_len(char* filename);
+int check_cluster_movement(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
 
 int main()
 {  
@@ -42,16 +43,25 @@ int main()
     int len_of_dataset = get_file_len(filename);
     printf("Lines of data: %d \n", len_of_dataset);
   
-    float temp_centers[NUM_OF_CLUSTERS][3] = {0};
+    float previous_clusters[NUM_OF_CLUSTERS][2] = {0};
+    float cluster_sum_info[NUM_OF_CLUSTERS][3] = {0};
     intialize_clusters(cluster_list, dataset, len_of_dataset);
-    print_tables(temp_centers, cluster_list, 0);
+    print_tables(cluster_sum_info, cluster_list, 0);
     for (size_t epoch = 0; epoch < 50; epoch++)
     {
-        reset_array(temp_centers);
+        reset_array(cluster_sum_info);
         set_labels(dataset, len_of_dataset);
-        reposition_cluster_centers(dataset, temp_centers, cluster_list, len_of_dataset);
-        print_tables(temp_centers, cluster_list, epoch);
-        //TODO: Check if clusters moved.
+        reposition_cluster_centers(dataset, cluster_sum_info, cluster_list, len_of_dataset);
+        print_tables(cluster_sum_info, cluster_list, epoch);
+        if(check_cluster_movement(cluster_list, previous_clusters) == 1){
+            break;
+        }
+        for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+        {
+            previous_clusters[idx][0] = cluster_list[idx].x;
+            previous_clusters[idx][1] =  cluster_list[idx].y;
+        }
+        
     }
     free(dataset);
     return 0;
@@ -155,28 +165,28 @@ void reset_array(float array[NUM_OF_CLUSTERS][3]){
 }
 
 void reposition_cluster_centers(float** dataset, \
-    float temp_centers[NUM_OF_CLUSTERS][3], \
+    float cluster_sum_info[NUM_OF_CLUSTERS][3], \
     Cluster* cluster_list, int len_of_dataset){
     int cluster_num = 0;
     for (size_t idx = 0; idx < len_of_dataset; idx++)
     {
         cluster_num = (int) dataset[idx][2];
-        temp_centers[cluster_num][0] += dataset[idx][0];
-        temp_centers[cluster_num][1] += dataset[idx][1];
-        temp_centers[cluster_num][2] += 1;
+        cluster_sum_info[cluster_num][0] += dataset[idx][0];
+        cluster_sum_info[cluster_num][1] += dataset[idx][1];
+        cluster_sum_info[cluster_num][2] += 1;
     }
     
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
-        if (!temp_centers[idx][2] == 0)
+        if (!cluster_sum_info[idx][2] == 0)
         {
-            cluster_list[idx].x = temp_centers[idx][0] / temp_centers[idx][2];
-            cluster_list[idx].y = temp_centers[idx][1] / temp_centers[idx][2];
+            cluster_list[idx].x = cluster_sum_info[idx][0] / cluster_sum_info[idx][2];
+            cluster_list[idx].y = cluster_sum_info[idx][1] / cluster_sum_info[idx][2];
         }
     }
 }
 
-void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list, int epoch){
+void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_list, int epoch){
     printf("%d =================================\n", epoch);
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
@@ -186,7 +196,7 @@ void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list,
     printf("\n");
     for (size_t i = 0; i < NUM_OF_CLUSTERS; i++)
     {
-        printf("%f, %f, %f \n", temp_centers[i][0], temp_centers[i][1],  temp_centers[i][2]);
+        printf("%f, %f, %f \n", cluster_sum_info[i][0], cluster_sum_info[i][1],  cluster_sum_info[i][2]);
     } 
     printf("\n\n");
 }
@@ -210,4 +220,18 @@ int get_file_len(char* filename){
     int len_of_dataset = get_num_of_lines(fp);
     fclose(fp);
     return len_of_dataset;
+}
+
+int check_cluster_movement(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]){
+
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        if (cluster_list[idx].x == previous_clusters[idx][0] && 
+            cluster_list[idx].y == previous_clusters[idx][1])
+        {
+            return 1;
+        }
+        return 0;
+    }
+    
 }
