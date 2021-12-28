@@ -31,34 +31,26 @@ void reposition_cluster_centers(float** dataset, \
 void intialize_clusters(Cluster* cluster_list, float** dataset, \
     int len_of_dataset);
 void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list);
+int get_file_len(char* filename);
 
 int main()
 {  
     char* filename = "dataset2.txt";
     float** dataset;
     dataset = read_file(filename);
-
-    FILE * fp;
-    int len_of_dataset = 0;
-    fp = fopen(filename, "r");
-    len_of_dataset = get_num_of_lines(fp);
-    fclose(fp);
-
+    int len_of_dataset = get_file_len(filename);
     printf("Lines of data: %d \n", len_of_dataset);
   
     float temp_centers[NUM_OF_CLUSTERS][3] = {0};
     for (size_t epoch = 0; epoch < 50; epoch++)
     {
-
         reset_array(temp_centers);
         set_labels(dataset, len_of_dataset);
         reposition_cluster_centers(dataset, temp_centers, cluster_list, len_of_dataset);
         print_tables(temp_centers, cluster_list);
-        // Check if clusters moved.
+        //TODO: Check if clusters moved.
     }
-
     free(dataset);
-
     return 0;
 }
 
@@ -207,4 +199,12 @@ void intialize_clusters(Cluster* cluster_list, float** dataset, int len_of_datas
         cluster.group = idx;
         cluster_list[idx] = cluster;
     }
+}
+
+int get_file_len(char* filename){
+    FILE * fp;
+    fp = fopen(filename, "r");
+    int len_of_dataset = get_num_of_lines(fp);
+    fclose(fp);
+    return len_of_dataset;
 }
