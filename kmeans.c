@@ -35,7 +35,7 @@ void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_l
 int get_file_len(char* filename);
 void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset);
 void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
-int check_cluster_movement(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
+int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
 
 int main()
 {  
@@ -54,8 +54,8 @@ int main()
         reset_array(cluster_sum_info);
         set_labels(dataset, len_dataset);
         reposition_cluster_centers(dataset, cluster_sum_info, cluster_list, len_dataset);
-        //print_tables(cluster_sum_info, cluster_list, epoch);
-        if(check_cluster_movement(cluster_list, previous_clusters) == 1){
+        print_tables(cluster_sum_info, cluster_list, epoch);
+        if(clusters_converged(cluster_list, previous_clusters) == 1){
             break;
         }
         for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
@@ -250,16 +250,24 @@ void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list){
     fclose(fp);
 }
 
-int check_cluster_movement(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]){
+int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]){
+    int cluster_conv_table[NUM_OF_CLUSTERS] = {0};
 
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
         if (cluster_list[idx].x == previous_clusters[idx][0] && 
             cluster_list[idx].y == previous_clusters[idx][1])
         {
-            return 1;
+            cluster_conv_table[idx] = 1;
         }
-        return 0;
     }
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        printf("%d", cluster_conv_table[idx]);
+        if (cluster_conv_table[idx] == 0){
+            return 0;
+        }
+    }
+    return 1;
     
 }
