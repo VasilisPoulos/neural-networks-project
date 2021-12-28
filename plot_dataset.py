@@ -3,7 +3,7 @@ import numpy as np
 from os.path import exists
 import matplotlib.pyplot as plt
 
-def plot_dataset(filename, num_of_columns):
+def plot_dataset(filename):
     if not exists(filename):
         print('{} does not exist.'.format(filename))
         exit(-1)
@@ -13,22 +13,30 @@ def plot_dataset(filename, num_of_columns):
                  2. : 'm', 
                  3. : 'b', 
                  4. : 'r'}
-    
-    points = np.empty((0, num_of_columns))
+
+    f = open(filename, "r")
+    number_of_columns = len(f.readline().strip().split(','))
+    points = np.empty((0, number_of_columns))
+
     with open(filename) as f:
         for line in f:
             np_line = np.array([float(item) for item in line.strip().split(',')])
             points = np.vstack([points, np_line])
 
-    if (num_of_columns == 3):
+    if (number_of_columns == 3):
         point_colors = np.array([])
-        for item in points[:,2]:
-            point_colors = np.append(point_colors, color_map[item])
 
-        plt.scatter(points[:,0], points[:,1], c=point_colors, marker="+", \
-            linewidths=1)
+        number_of_clusters = len(set(point_colors))
+        if not number_of_clusters > len(color_map):
+            plt.scatter(points[:,0], points[:,1], c=points[:,2], marker="+", \
+                linewidths=1)
+        else:
+            for item in points[:,2]:
+                point_colors = np.append(point_colors, color_map[item])
+            plt.scatter(points[:,0], points[:,1], c=point_colors, marker="+", \
+                linewidths=1)
     else:
-        plt.scatter(points[:,0], points[:,1], marker="+", linewidths=0.5)
+        plt.scatter(points[:,0], points[:,1], marker="+", linewidths=1)
     plt.show()
 
 def plot_clusters(filename):
@@ -43,10 +51,10 @@ def plot_clusters(filename):
     plt.scatter(points[:,0], points[:,1])
     
 if __name__ == '__main__':
-    if not len(sys.argv) > 2:
-        print('Use: python dataset_generator.py <filename> <num_of_columns> <kmeans_clusters>')
+    if not len(sys.argv) > 1:
+        print('Use: python dataset_generator.py <filename> <kmeans_clusters>')
         exit(0)
 
-    if len(sys.argv) > 3:
-        plot_clusters(sys.argv[3])
-    plot_dataset(sys.argv[1], int(sys.argv[2]))
+    if len(sys.argv) > 2:
+        plot_clusters(sys.argv[2])
+    plot_dataset(sys.argv[1])

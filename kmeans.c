@@ -5,7 +5,7 @@
 #include <time.h>
 #include "utility.h"
 
-#define NUM_OF_CLUSTERS 5
+#define NUM_OF_CLUSTERS 10
 // When comparing distances we can omit the square root of the euclidean 
 // distance function and we can make it into a macro so we don'thave to pay for 
 // function call overhead.
