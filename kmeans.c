@@ -25,6 +25,12 @@ float* parse_line(char* line);
 int get_num_of_lines(FILE *fp);
 void set_labels(float** dataset, int len_of_dataset);
 void reset_array(float array[NUM_OF_CLUSTERS][3]);
+void reposition_cluster_centers(float** dataset, \
+    float temp_centers[NUM_OF_CLUSTERS][3], \
+    Cluster* cluster_list, int len_of_dataset);
+void intialize_clusters(Cluster* cluster_list, float** dataset, \
+    int len_of_dataset);
+void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list);
 
 int main()
 {  
@@ -39,85 +45,17 @@ int main()
     fclose(fp);
 
     printf("Lines of data: %d \n", len_of_dataset);
-    srand(time(NULL)); 
-    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
-    {
-        Cluster cluster;
-        int dataset_idx = generate_random_float(0, len_of_dataset - 1);
-        cluster.x = dataset[dataset_idx][0];
-        cluster.y = dataset[dataset_idx][1];
-        cluster.group = idx;
-        cluster_list[idx] = cluster;
-    }
-
-    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
-    {
-        printf("x: %f, y: %f, group: %d\n", cluster_list[idx].x, \
-        cluster_list[idx].y, cluster_list[idx].group);
-    }
-
+  
     float temp_centers[NUM_OF_CLUSTERS][3] = {0};
-    int cluster_num = 0;
     for (size_t epoch = 0; epoch < 50; epoch++)
     {
-        // Reset temp array.
+
         reset_array(temp_centers);
-
-        // Calculating distances.
         set_labels(dataset, len_of_dataset);
-
-        // Changing cluster positions.
-        for (size_t idx = 0; idx < len_of_dataset; idx++)
-        {
-            cluster_num = (int) dataset[idx][2];
-            temp_centers[cluster_num][0] += dataset[idx][0];
-            temp_centers[cluster_num][1] += dataset[idx][1];
-            temp_centers[cluster_num][2] += 1;
-        }
-        printf("==\n");
-        for (size_t i = 0; i < NUM_OF_CLUSTERS; i++)
-        {
-            printf("%f, %f, %f \n", temp_centers[i][0], temp_centers[i][1],  temp_centers[i][2]);
-        }   
-        printf("\n");
-
-        for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
-        {
-            if (!temp_centers[idx][2] == 0)
-            {
-                cluster_list[idx].x = temp_centers[idx][0] / temp_centers[idx][2];
-                cluster_list[idx].y = temp_centers[idx][1] / temp_centers[idx][2];
-            }
-        }
-       
-        for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
-        {
-            printf("x: %f, y: %f, group: %d\n", cluster_list[idx].x, \
-            cluster_list[idx].y, cluster_list[idx].group);
-        }
-
+        reposition_cluster_centers(dataset, temp_centers, cluster_list, len_of_dataset);
+        print_tables(temp_centers, cluster_list);
         // Check if clusters moved.
-
     }
-
-    // for (size_t i = 0; i < len_of_dataset; i++)
-    // {
-    //     printf("%f, %f, %f\n", dataset[i][0], dataset[i][1], dataset[i][2]);  
-    // }
-
-    // for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
-    // {
-    //     printf("x: %f, y: %f, group: %d\n", cluster_list[idx].x, \
-    //     cluster_list[idx].y, cluster_list[idx].group);
-    // }
-
-    // dealocate memory
-    // for (size_t idx = 0; idx < len_of_dataset; idx++)
-    // {
-    //     free(dataset[idx]);
-    // }
-    // free(dataset);
-
     return 0;
 }
 
@@ -215,5 +153,55 @@ void reset_array(float array[NUM_OF_CLUSTERS][3]){
         for (int j = 0; j < 3; j++) {
             array[i][j] = 0;  
         }
+    }
+}
+
+void reposition_cluster_centers(float** dataset, \
+    float temp_centers[NUM_OF_CLUSTERS][3], \
+    Cluster* cluster_list, int len_of_dataset){
+    int cluster_num = 0;
+    for (size_t idx = 0; idx < len_of_dataset; idx++)
+    {
+        cluster_num = (int) dataset[idx][2];
+        temp_centers[cluster_num][0] += dataset[idx][0];
+        temp_centers[cluster_num][1] += dataset[idx][1];
+        temp_centers[cluster_num][2] += 1;
+    }
+    
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        if (!temp_centers[idx][2] == 0)
+        {
+            cluster_list[idx].x = temp_centers[idx][0] / temp_centers[idx][2];
+            cluster_list[idx].y = temp_centers[idx][1] / temp_centers[idx][2];
+        }
+    }
+}
+
+void print_tables(float temp_centers[NUM_OF_CLUSTERS][3], Cluster* cluster_list){
+    printf("==\n");
+    for (size_t i = 0; i < NUM_OF_CLUSTERS; i++)
+    {
+        printf("%f, %f, %f \n", temp_centers[i][0], temp_centers[i][1],  temp_centers[i][2]);
+    }   
+    printf("\n");
+    
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        printf("x: %f, y: %f, group: %d\n", cluster_list[idx].x, \
+        cluster_list[idx].y, cluster_list[idx].group);
+    }
+}
+
+void intialize_clusters(Cluster* cluster_list, float** dataset, int len_of_dataset){
+    srand(time(NULL)); 
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        Cluster cluster;
+        int dataset_idx = generate_random_float(0, len_of_dataset - 1);
+        cluster.x = dataset[dataset_idx][0];
+        cluster.y = dataset[dataset_idx][1];
+        cluster.group = idx;
+        cluster_list[idx] = cluster;
     }
 }
