@@ -5,7 +5,7 @@
 #include <time.h>
 #include "utility.h"
 
-#define NUM_OF_CLUSTERS 15
+#define NUM_OF_CLUSTERS 10
 // When comparing distances we can omit the square root of the euclidean 
 // distance function and we can make it into a macro so we don'thave to pay for 
 // function call overhead.
@@ -40,9 +40,9 @@ float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset);
 
 int main()
 {  
-    char* filename = "dataset2.txt";
+    char* filename = "../data/dataset2.txt";
     float** dataset;
-    dataset = read_file("dataset2.txt");
+    dataset = read_file(filename);
     int len_dataset = get_file_len(filename);
     //printf("Lines of data: %d \n", len_dataset);
   
@@ -67,8 +67,8 @@ int main()
         
     }
     //print_tables(cluster_sum_info, cluster_list, -1);
-    write_labeled_dataset_to_file("labeled_data.txt", dataset, len_dataset);
-    write_kmeans_clusters_to_file("kmeans_clusters.txt", cluster_list);
+    write_labeled_dataset_to_file("../out/labeled_data.txt", dataset, len_dataset);
+    write_kmeans_clusters_to_file("../out/kmeans_clusters.txt", cluster_list);
     float* error_table = error_calc(cluster_list, dataset, len_dataset);
     float total_error = 0.0;
     for (int i = 0; i < NUM_OF_CLUSTERS; i++)
