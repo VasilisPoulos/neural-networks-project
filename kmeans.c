@@ -5,7 +5,7 @@
 #include <time.h>
 #include "utility.h"
 
-#define NUM_OF_CLUSTERS 10
+#define NUM_OF_CLUSTERS 15
 // When comparing distances we can omit the square root of the euclidean 
 // distance function and we can make it into a macro so we don'thave to pay for 
 // function call overhead.
@@ -36,7 +36,7 @@ int get_file_len(char* filename);
 void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset);
 void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
 int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
-float* error_calc(Cluster* cluster_list, float cluster_sum_info[NUM_OF_CLUSTERS][3],float** dataset, int len_of_dataset);
+float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset);
 
 int main()
 {  
@@ -44,7 +44,7 @@ int main()
     float** dataset;
     dataset = read_file("dataset2.txt");
     int len_dataset = get_file_len(filename);
-    printf("Lines of data: %d \n", len_dataset);
+    //printf("Lines of data: %d \n", len_dataset);
   
     float previous_clusters[NUM_OF_CLUSTERS][2] = {0};
     float cluster_sum_info[NUM_OF_CLUSTERS][3] = {0};
@@ -55,7 +55,7 @@ int main()
         reset_array(cluster_sum_info);
         set_labels(dataset, len_dataset);
         reposition_cluster_centers(dataset, cluster_sum_info, cluster_list, len_dataset);
-        print_tables(cluster_sum_info, cluster_list, epoch);
+        //print_tables(cluster_sum_info, cluster_list, epoch);
         if(clusters_converged(cluster_list, previous_clusters) == 1){
             break;
         }
@@ -69,7 +69,15 @@ int main()
     //print_tables(cluster_sum_info, cluster_list, -1);
     write_labeled_dataset_to_file("labeled_data.txt", dataset, len_dataset);
     write_kmeans_clusters_to_file("kmeans_clusters.txt", cluster_list);
-    error_calc(cluster_list,cluster_sum_info,dataset,len_dataset);
+    float* error_table = error_calc(cluster_list, dataset, len_dataset);
+    float total_error = 0.0;
+    for (int i = 0; i < NUM_OF_CLUSTERS; i++)
+    {   
+        total_error += error_table[i];
+        //printf("Error: %f at cluster %d.\n", error_table[i], i);
+    }
+    printf("Total error: %f\n", total_error);
+    
     free(dataset);
     return 0;
 }
@@ -265,7 +273,7 @@ int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLU
     }
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
-        printf("%d", cluster_conv_table[idx]);
+        //printf("%d", cluster_conv_table[idx]);
         if (cluster_conv_table[idx] == 0){
             return 0;
         }
@@ -274,23 +282,15 @@ int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLU
     
 }
 
-float* error_calc(Cluster* cluster_list, float cluster_sum_info[NUM_OF_CLUSTERS][3],float** dataset, int len_of_dataset){
-    float category_sum[NUM_OF_CLUSTERS];
-    Cluster cluster;
+float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset){ 
+    float *category_sum = (float*) calloc(NUM_OF_CLUSTERS, sizeof(float));
 
-    for(int x = 0; x < NUM_OF_CLUSTERS; x++)
-    {
-        category_sum[x] = 0.0;
-    }
-    
     for (size_t idx = 0; idx < len_of_dataset; idx++) 
     {
-        int pos = dataset[idx][2];
-        float dx = dataset[idx][0]; 
-        float dy = dataset[idx][1];
-        float distance_from_cluster = EUCLIDEAN(dx, dy);
-        category_sum[pos] += pow((distance_from_cluster - cluster_sum_info[pos][3]),2);
-        printf("Error: %f at cluster %d. For center %f and distance from claster %f\n",category_sum[pos],pos,cluster_sum_info[pos][3],distance_from_cluster);
+        int label = dataset[idx][2];
+        float dx = dataset[idx][0] - cluster_list[label].x; 
+        float dy = dataset[idx][1] - cluster_list[label].y;
+        category_sum[label] +=  EUCLIDEAN(dx, dy);
     }
     return category_sum;
 }
