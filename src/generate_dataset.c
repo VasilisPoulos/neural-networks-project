@@ -26,7 +26,6 @@ int select_category(float x1, float x2) {
 	}else {
 		return 4;
 	}
-	return 0;
 }
 
 float propability(){
