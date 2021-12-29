@@ -43,8 +43,8 @@ int change_category(int current_category){
 
 int generate_dataset_s1() {
 	FILE *training_set_fp, *test_set_fp;
-	training_set_fp = fopen("./training_set.txt", "w");
-	test_set_fp = fopen("./test_set.txt", "w");
+	training_set_fp = fopen("../data/training_set.txt", "w");
+	test_set_fp = fopen("../data/test_set.txt", "w");
 
 	float x1;
 	float x2;
@@ -75,7 +75,7 @@ int generate_dataset_s1() {
 
 int generate_dataset_s2(){
 	FILE* dataset2_fp;
-	dataset2_fp = fopen("./dataset2.txt", "w");
+	dataset2_fp = fopen("../data/dataset2.txt", "w");
 	srand(time(0));
 
 	float x1, x2;
