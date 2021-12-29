@@ -37,7 +37,7 @@ int main()
 {  
     char* filename = "../data/dataset2.txt";
     float** dataset;
-    dataset = read_file(filename);
+    dataset = read_file(filename, UNLABELED_SET);
     int len_dataset = get_file_len(filename);
     //printf("Lines of data: %d \n", len_dataset);
   

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-
+# define LABELED_SET 1
 float generate_random_float(float lowest, float highest) {
 	float scale = rand() / (float) RAND_MAX;
 	return lowest + scale * (highest - lowest);
@@ -44,12 +44,16 @@ int get_file_len(char* filename){
     return len_of_dataset;
 }
 
-float* parse_line(char* line){
+float* parse_line(char* line, int type){
     char *next_token;
     float* coords = malloc(2*sizeof(float*));
-
+	int size = 2;
+	if (type == LABELED_SET)
+	{
+		size = 3;
+	}
     next_token = strtok(line,",");
-    for (size_t idx = 0; idx < 2; idx++)
+    for (size_t idx = 0; idx < size; idx++)
     {
         float number = strtof(next_token, NULL);
         next_token = strtok (NULL, ",");
@@ -58,7 +62,7 @@ float* parse_line(char* line){
     return coords;
 }
 
-float** read_file(char* filename) {
+float** read_file(char* filename, int type) {
     FILE * fp;
     char * line = NULL;
     float* coords;
@@ -82,10 +86,14 @@ float** read_file(char* filename) {
     for (size_t idx = 0; idx < num_of_lines; idx++)
     {
         read = getline(&line, &len, fp);
-        coords = parse_line(line);
+        coords = parse_line(line, type);
         dataset[idx][0] = coords[0];
         dataset[idx][1] = coords[1];
-        dataset[idx][2] = -1;
+		if (type == LABELED_SET){
+			dataset[idx][2] = coords[2];
+		}else{
+			dataset[idx][2] = -1;
+		}
     }
 
     fclose(fp);
