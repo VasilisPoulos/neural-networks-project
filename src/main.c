@@ -26,7 +26,7 @@ int main()
 
     for(int temp_pos = 1; temp_pos < 20; temp_pos++)
     {
-        if(min_error[0] > min_error[temp_pos] )
+        if(min_error[temp_pos] < min_error[pos] )
         {
             pos = temp_pos;
         }
