@@ -18,9 +18,8 @@ float relu(float input){
 	if (input > 0){
 		return 1.0;
 	}
-	else{ return 0.0; }
+	else{ return -1.0; }
 }
-
 
 int get_num_of_lines(FILE *fp){
     int lines = 0;
