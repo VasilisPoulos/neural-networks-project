@@ -7,15 +7,13 @@
 
 //For the 1-7 tasks of ex.1
 
-#define NUM_OF_INPUTS 5
-#define NUM_OF_CATEGORIES 4
-#define NUM_OF_NEURALS_FIRST 4
-#define NUM_OF_NEURALS_SECOND 3
-#define NUM_OF_NEURALS_THIRD 2
-#define TYPE "relu" 
+#define D 5
+#define K 4
+#define H1 4
+#define H2 3
+#define H3 2
+#define ACTIVATION_FUNC "relu" 
 
-#define SET1_SIZE 8000
-#define SET2_SIZE 1200
 #define ERROR_PROPABILITY 0.1
 #define RAND_LOW -1
 #define RAND_HIGH 1

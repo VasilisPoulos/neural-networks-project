@@ -5,7 +5,7 @@
 #include <time.h>
 #include "utility.h"
 
-#define NUM_OF_CLUSTERS 10
+#define NUM_OF_CLUSTERS 6
 // When comparing distances we can omit the square root of the euclidean 
 // distance function and we can make it into a macro so we don'thave to pay for 
 // function call overhead.
@@ -54,7 +54,7 @@ int main()
         reset_array(cluster_sum_info);
         set_labels(dataset, len_dataset);
         reposition_cluster_centers(dataset, cluster_sum_info, cluster_list, len_dataset);
-        print_tables(cluster_sum_info, cluster_list, epoch);
+        //print_tables(cluster_sum_info, cluster_list, epoch);
         if(clusters_converged(cluster_list, previous_clusters) == 1){
             break;
         }
@@ -263,7 +263,7 @@ int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLU
     }
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
-        printf("%d", cluster_conv_table[idx]);
+        // printf("%d", cluster_conv_table[idx]);
         if (cluster_conv_table[idx] == 0){
             return 0;
         }
