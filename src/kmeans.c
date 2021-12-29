@@ -19,23 +19,18 @@ typedef struct {
 } Cluster;
 
 Cluster cluster_list[NUM_OF_CLUSTERS];
-
-float** read_file(char* filename);
-float* parse_line(char* line);
-int get_num_of_lines(FILE *fp);
-void set_labels(float** dataset, int len_of_dataset);
+void intialize_clusters(Cluster* cluster_list, float** dataset, \
+    int len_of_dataset);
 void reset_array(float array[NUM_OF_CLUSTERS][3]);
+void set_labels(float** dataset, int len_of_dataset);
 void reposition_cluster_centers(float** dataset, \
     float cluster_sum_info[NUM_OF_CLUSTERS][3], \
     Cluster* cluster_list, int len_of_dataset);
-void intialize_clusters(Cluster* cluster_list, float** dataset, \
-    int len_of_dataset);
+int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
 void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_list, \
     int epoch);
-int get_file_len(char* filename);
 void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset);
 void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
-int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
 float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset);
 
 int main()
@@ -82,70 +77,25 @@ int main()
     return 0;
 }
 
-float** read_file(char* filename) {
-    FILE * fp;
-    char * line = NULL;
-    float* coords;
-    size_t len = 0;
-    ssize_t read;
-    int num_of_lines = 0;
-
-    fp = fopen(filename, "r");
-    if (fp == NULL)
-        exit(-1);
-
-    num_of_lines = get_num_of_lines(fp);
-
-    float* values = calloc(num_of_lines*3, sizeof(float));
-    float** dataset = malloc(num_of_lines*sizeof(float*));
-    for (int i=0; i< num_of_lines; ++i)
+void intialize_clusters(Cluster* cluster_list, float** dataset, int len_of_dataset){
+    srand(time(NULL)); 
+    Cluster cluster;
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
-        dataset[i] = values + i*3;
+        int dataset_idx = generate_random_float(0, len_of_dataset - 1);
+        cluster.x = dataset[dataset_idx][0];
+        cluster.y = dataset[dataset_idx][1];
+        cluster.group = idx;
+        cluster_list[idx] = cluster;
     }
-
-    for (size_t idx = 0; idx < num_of_lines; idx++)
-    {
-        read = getline(&line, &len, fp);
-        coords = parse_line(line);
-        dataset[idx][0] = coords[0];
-        dataset[idx][1] = coords[1];
-        dataset[idx][2] = -1;
-    }
-
-    fclose(fp);
-    if (line)
-        free(line);
-    
-    return dataset;
 }
 
-float* parse_line(char* line){
-    char *next_token;
-    float* coords = malloc(2*sizeof(float*));
-
-    next_token = strtok(line,",");
-    for (size_t idx = 0; idx < 2; idx++)
-    {
-        float number = strtof(next_token, NULL);
-        next_token = strtok (NULL, ",");
-        coords[idx] = number;
-    }
-    return coords;
-}
-
-int get_num_of_lines(FILE *fp){
-    int lines = 0;
-    int ch = 0;
-    while(!feof(fp))
-    {
-        ch = fgetc(fp);
-        if(ch == '\n')
-        {
-            lines++;
+void reset_array(float array[NUM_OF_CLUSTERS][3]){
+    for(int i = 0; i < NUM_OF_CLUSTERS; i++) {
+        for (int j = 0; j < 3; j++) {
+            array[i][j] = 0;  
         }
     }
-    fseek(fp, 0L, SEEK_SET);
-    return lines;
 }
 
 void set_labels(float** dataset, int len_of_dataset){
@@ -174,14 +124,6 @@ void set_labels(float** dataset, int len_of_dataset){
     }
 }
     
-void reset_array(float array[NUM_OF_CLUSTERS][3]){
-    for(int i = 0; i < NUM_OF_CLUSTERS; i++) {
-        for (int j = 0; j < 3; j++) {
-            array[i][j] = 0;  
-        }
-    }
-}
-
 void reposition_cluster_centers(float** dataset, \
     float cluster_sum_info[NUM_OF_CLUSTERS][3], \
     Cluster* cluster_list, int len_of_dataset){
@@ -204,6 +146,27 @@ void reposition_cluster_centers(float** dataset, \
     }
 }
 
+int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]){
+    int cluster_conv_table[NUM_OF_CLUSTERS] = {0};
+
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        if (cluster_list[idx].x == previous_clusters[idx][0] && 
+            cluster_list[idx].y == previous_clusters[idx][1])
+        {
+            cluster_conv_table[idx] = 1;
+        }
+    }
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        //printf("%d", cluster_conv_table[idx]);
+        if (cluster_conv_table[idx] == 0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
 void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_list, int epoch){
     printf("%d =================================\n", epoch);
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
@@ -217,27 +180,6 @@ void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_l
         printf("%f, %f, %f \n", cluster_sum_info[i][0], cluster_sum_info[i][1],  cluster_sum_info[i][2]);
     } 
     printf("\n\n");
-}
-
-void intialize_clusters(Cluster* cluster_list, float** dataset, int len_of_dataset){
-    srand(time(NULL)); 
-    Cluster cluster;
-    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
-    {
-        int dataset_idx = generate_random_float(0, len_of_dataset - 1);
-        cluster.x = dataset[dataset_idx][0];
-        cluster.y = dataset[dataset_idx][1];
-        cluster.group = idx;
-        cluster_list[idx] = cluster;
-    }
-}
-
-int get_file_len(char* filename){
-    FILE * fp;
-    fp = fopen(filename, "r");
-    int len_of_dataset = get_num_of_lines(fp);
-    fclose(fp);
-    return len_of_dataset;
 }
 
 void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset){
@@ -258,28 +200,6 @@ void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list){
         fprintf(fp, "%f, %f, %d\n", cluster_list[idx].x, cluster_list[idx].y, cluster_list[idx].group);
     }
     fclose(fp);
-}
-
-int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]){
-    int cluster_conv_table[NUM_OF_CLUSTERS] = {0};
-
-    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
-    {
-        if (cluster_list[idx].x == previous_clusters[idx][0] && 
-            cluster_list[idx].y == previous_clusters[idx][1])
-        {
-            cluster_conv_table[idx] = 1;
-        }
-    }
-    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
-    {
-        //printf("%d", cluster_conv_table[idx]);
-        if (cluster_conv_table[idx] == 0){
-            return 0;
-        }
-    }
-    return 1;
-    
 }
 
 float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset){ 
