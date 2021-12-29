@@ -26,8 +26,8 @@ def plot_dataset(filename):
     if (number_of_columns == 3):
         point_colors = np.array([])
 
-        number_of_clusters = len(set(point_colors))
-        if not number_of_clusters > len(color_map):
+        number_of_clusters = len(set(points[:,2]))
+        if number_of_clusters > len(color_map):
             plt.scatter(points[:,0], points[:,1], c=points[:,2], marker="+", \
                 linewidths=1)
         else:

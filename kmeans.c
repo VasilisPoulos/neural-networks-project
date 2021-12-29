@@ -5,7 +5,11 @@
 #include <time.h>
 #include "utility.h"
 
+<<<<<<< HEAD
 #define NUM_OF_CLUSTERS 6
+=======
+#define NUM_OF_CLUSTERS 15
+>>>>>>> 1129b78f4d5e2d98932ad321ed10873560bc1311
 // When comparing distances we can omit the square root of the euclidean 
 // distance function and we can make it into a macro so we don'thave to pay for 
 // function call overhead.
@@ -36,6 +40,7 @@ int get_file_len(char* filename);
 void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset);
 void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
 int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
+float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset);
 
 int main()
 {  
@@ -43,7 +48,7 @@ int main()
     float** dataset;
     dataset = read_file("dataset2.txt");
     int len_dataset = get_file_len(filename);
-    printf("Lines of data: %d \n", len_dataset);
+    //printf("Lines of data: %d \n", len_dataset);
   
     float previous_clusters[NUM_OF_CLUSTERS][2] = {0};
     float cluster_sum_info[NUM_OF_CLUSTERS][3] = {0};
@@ -68,6 +73,15 @@ int main()
     //print_tables(cluster_sum_info, cluster_list, -1);
     write_labeled_dataset_to_file("labeled_data.txt", dataset, len_dataset);
     write_kmeans_clusters_to_file("kmeans_clusters.txt", cluster_list);
+    float* error_table = error_calc(cluster_list, dataset, len_dataset);
+    float total_error = 0.0;
+    for (int i = 0; i < NUM_OF_CLUSTERS; i++)
+    {   
+        total_error += error_table[i];
+        //printf("Error: %f at cluster %d.\n", error_table[i], i);
+    }
+    printf("Total error: %f\n", total_error);
+    
     free(dataset);
     return 0;
 }
@@ -263,11 +277,28 @@ int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLU
     }
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
+<<<<<<< HEAD
         // printf("%d", cluster_conv_table[idx]);
+=======
+        //printf("%d", cluster_conv_table[idx]);
+>>>>>>> 1129b78f4d5e2d98932ad321ed10873560bc1311
         if (cluster_conv_table[idx] == 0){
             return 0;
         }
     }
     return 1;
     
+}
+
+float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset){ 
+    float *category_sum = (float*) calloc(NUM_OF_CLUSTERS, sizeof(float));
+
+    for (size_t idx = 0; idx < len_of_dataset; idx++) 
+    {
+        int label = dataset[idx][2];
+        float dx = dataset[idx][0] - cluster_list[label].x; 
+        float dy = dataset[idx][1] - cluster_list[label].y;
+        category_sum[label] +=  EUCLIDEAN(dx, dy);
+    }
+    return category_sum;
 }
