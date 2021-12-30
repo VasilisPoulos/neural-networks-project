@@ -12,7 +12,8 @@
 #define H3 2
 #define ACTIVATION_FUNC "relu" 
 #define NUM_OF_LAYERS 3
-
+#define TANH(x) tanh(x)
+#define RELU(x) x > 0 ? 1.0 : -1.0
 
 typedef struct{
 	float input;
@@ -57,7 +58,7 @@ int main(){
 	// 	printf("%f, %f, %f \n", test_dataset[i][0], test_dataset[i][1],\
 	// 	  test_dataset[i][2]);
 	// }	
-
+	//printf("%f\n", RELU(-2));
 	initiate_network();
 	print_layer_weights();
 	return 0;
