@@ -11,8 +11,15 @@
 #include <unistd.h>
 #endif
 
+void kmeans_generator();
+
 int main()
 {   
+    kmeans_generator();
+    return 0;
+} 
+
+void kmeans_generator(){
     float min_error[20] = {0};
     int pos = 0;
     float min = 0.0;
@@ -21,7 +28,7 @@ int main()
         sleep(1);
         min = kmeans(i);
         min_error[i] = min;
-        printf("For repetition no.%d error is %f\n",i,min_error[i]);
+        //printf("For repetition no.%d error is %f\n",i,min_error[i]);
     }
 
     for(int temp_pos = 1; temp_pos < 20; temp_pos++)
@@ -32,6 +39,5 @@ int main()
         }
     }
     printf("Minimum error is present at location %d and its value is %f.\n", pos, min_error[pos]);
-    return 0;
-} 
+    }
 
