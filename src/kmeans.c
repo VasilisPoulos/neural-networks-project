@@ -18,6 +18,14 @@ typedef struct {
 	int		group;
 } Cluster;
 
+typedef struct {
+    double error;
+    double x;
+    double y;
+} Kmeans;
+
+Kmeans kmeans_data[NUM_OF_CLUSTERS];
+
 Cluster cluster_list[NUM_OF_CLUSTERS];
 void intialize_clusters(Cluster* cluster_list, float** dataset, \
     int len_of_dataset);
@@ -32,8 +40,8 @@ void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_l
 void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset);
 void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
 float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset);
-float kmeans(int);
-
+//float kmeans(int num);
+Kmeans* kmeans(int num);
 void intialize_clusters(Cluster* cluster_list, float** dataset, int len_of_dataset){
     srand(time(NULL)); 
     Cluster cluster;
@@ -173,7 +181,7 @@ float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset){
 }
 
 
-float kmeans(int num)
+Kmeans* kmeans(int num)
 {  
     char* filename = "../data/dataset2.txt";
     float** dataset;
@@ -209,11 +217,18 @@ float kmeans(int num)
     for (int i = 0; i < NUM_OF_CLUSTERS; i++)
     {   
         total_error += error_table[i];
+        kmeans_data->error = total_error;
+        for (ssize_t i = 0; i < NUM_OF_CLUSTERS; i++)
+        {
+            kmeans_data->x = cluster_list[i].x;
+            kmeans_data->y = cluster_list[i].y;
+        }
+
         //printf("Error: %f at cluster %d.\n", error_table[i], i);
     }
     printf("Total error: %f\n", total_error);
     
     free(dataset);
-    return total_error;
-    
+    //return total_error;
+    return kmeans_data;
 }
