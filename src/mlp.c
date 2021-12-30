@@ -15,6 +15,7 @@
 #define RELU(x) x > 0 ? 1.0 : -1.0
 #define NUM_OF_HIDDEN_LAYERS 3
 #define NUM_OF_LAYERS NUM_OF_HIDDEN_LAYERS + 2
+#define BIAS 1
 
 
 typedef struct{
@@ -37,7 +38,7 @@ int _3layers[] = {D, H1, H2, H3, K};
 
 void initiate_network();
 void print_layer_weights();
-
+void forward_pass(float *x, float *y, int k);
 int main(){
 	float** training_dataset = read_file("../data/training_set.txt", LABELED_SET);
 	float** test_dataset = read_file("../data/test_set.txt", LABELED_SET);
@@ -49,6 +50,11 @@ int main(){
 	// }	
 	//printf("%f\n", RELU(-2));
 	initiate_network();
+	//print_layer_weights();
+	float *y;
+	float array[] = {0, 1, 0, 1, 1};
+	float *x = array;  
+	forward_pass(x, y, 4);
 	print_layer_weights();
 	return 0;
 }
@@ -107,8 +113,8 @@ void print_layer_weights(){
 					printf("Neuron %d-%d: %f\n", neuron_idx+1, i+1, layers[layer_idx][neuron_idx].weight[i]);	
 				}
 			}
+			printf("Output: %f\n", layers[layer_idx][neuron_idx].output);
 			printf("Bias weight: %f\n\n", layers[layer_idx][neuron_idx].bias_weight);
-			
 		}
 		printf("\n");
 	}
@@ -116,19 +122,29 @@ void print_layer_weights(){
 
 void forward_pass(float *x, float *y, int k){
 	float sum = 0.0;
-	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS + 2; layer_idx++)
+	float input = 0.0;
+	float weight = 0.0;
+	Neuron neuron;
+	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
-		sum = 0.0;
+		sum = 0.0;	
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
-		{
-
-			for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx-1]; i++)
-			{
-				
-			}
-			 
+		{	
+			if(layer_idx == 0){
+				layers[layer_idx][neuron_idx].output = x[neuron_idx];
+			}else{
+				for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx-1]; i++){
+					neuron = layers[layer_idx-1][i];
+					input = neuron.output;
+					weight = neuron.weight[i];
+					sum += input * weight + neuron.bias_weight * BIAS;
+				}
+				layers[layer_idx][neuron_idx].output = sum;	
+			}	 
 		}
 		printf("\n");
 	}
+
+
 
 }
