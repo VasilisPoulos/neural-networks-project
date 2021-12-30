@@ -11,40 +11,29 @@
 #define H2 3
 #define H3 2
 #define ACTIVATION_FUNC "relu" 
-#define NUM_OF_LAYERS 3
 #define TANH(x) tanh(x)
 #define RELU(x) x > 0 ? 1.0 : -1.0
+#define NUM_OF_HIDDEN_LAYERS 3
+#define NUM_OF_LAYERS NUM_OF_HIDDEN_LAYERS + 2
+
 
 typedef struct{
 	float input;
 	float output;
-	float weight;
+	float* weight;
+	float bias_weight;
 	float error;
 }Neuron;
 
-
+Neuron input_layer[D];
 Neuron first_layer[H1];
 Neuron second_layer[H2];
 Neuron third_layer[H3]; 
 Neuron output_layer[K];
-Neuron* layers[NUM_OF_LAYERS + 1];
+Neuron* layers[NUM_OF_LAYERS];
 int* num_of_neurons_per_layer;
-int _2layers[] = {H1, H2, K};
-int _3layers[] = {H1, H2, H3, K};
-
-
-// #if THREE_LAYER_NET
-// Neuron* layers[3];
-// Neuron third_layer[H3]; 
-// *layers[0] = first_layer;
-// *layers[1] = second_layer;
-// *layers[2] = third_layer;
-// #else
-// Neuron* layers[2];
-// *layers[0] = first_layer;
-// *layers[1] = second_layer;
-// #endif
-
+int _2layers[] = {D, H1, H2, K};
+int _3layers[] = {D, H1, H2, H3, K};
 
 void initiate_network();
 void print_layer_weights();
@@ -65,43 +54,81 @@ int main(){
 }
 
 void initiate_network(){
-	layers[0] = first_layer;
-	layers[1] = second_layer;
+	layers[0] = input_layer;
+	layers[1] = first_layer;
+	layers[2] = second_layer;
 
-	if(NUM_OF_LAYERS == 3){
-		layers[2] = third_layer;
-		layers[3] = output_layer;
-		
+	if(NUM_OF_HIDDEN_LAYERS == 3){
+		layers[3] = third_layer;
+		layers[4] = output_layer;
 		num_of_neurons_per_layer = _3layers;
 	}else{
-		layers[2] = output_layer;
-		int layers[] = {H1, H2, K};
+		layers[3] = output_layer;
 		num_of_neurons_per_layer = _2layers;
 	}
 
-	for (size_t layer_idx = 0; layer_idx < NUM_OF_LAYERS + 1; layer_idx++)
+	for (size_t layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
 		for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{
-			Neuron neuron = {.weight = generate_random_float(-1, 1)};
+			Neuron neuron;
+			neuron.bias_weight = generate_random_float(-1, 1);
+			if(layer_idx == NUM_OF_LAYERS - 1){
+				neuron.weight = (float*) calloc(1, sizeof(float));
+				neuron.weight[0] = 1;
+			}else{
+				int weight_list_len = num_of_neurons_per_layer[layer_idx + 1];
+				neuron.weight = (float*) calloc(weight_list_len, sizeof(float));
+				for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx + 1]; i++)
+				{
+					neuron.weight[i] = generate_random_float(-1, 1);
+				}
+			}
 			layers[layer_idx][neuron_idx] = neuron;
 		}
 	}	
 }
 
 void print_layer_weights(){
-	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS + 1; layer_idx++)
+	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
-		if(layer_idx == NUM_OF_LAYERS){
+		if(layer_idx == NUM_OF_LAYERS-1){
 			printf("----OUTPUT LAYER----\n");
 		}else{
 			printf("----LAYER %d----\n", layer_idx + 1);
 		}
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{
-			printf("Neuron%d: %f\n", neuron_idx+1, layers[layer_idx][neuron_idx].weight);
+			if((layer_idx == NUM_OF_LAYERS-1)){
+				printf("Neuron %d-1: %f\n", neuron_idx+1, layers[layer_idx][neuron_idx].weight[0]);	
+			}else{
+				for (int i = 0; i <  num_of_neurons_per_layer[layer_idx + 1]; i++)
+				{
+					printf("Neuron %d-%d: %f\n", neuron_idx+1, i+1, layers[layer_idx][neuron_idx].weight[i]);	
+				}
+			}
+			printf("Bias weight: %f\n\n", layers[layer_idx][neuron_idx].bias_weight);
+			
 		}
 		printf("\n");
 	}
 }
 
+void forward_pass(float *x, float *y, int k){
+	float sum = 0.0;
+	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS + 2; layer_idx++)
+	{
+		sum = 0.0;
+		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
+		{
+
+			for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx-1]; i++)
+			{
+				
+			}
+			 
+		}
+		printf("\n");
+	}
+
+}
