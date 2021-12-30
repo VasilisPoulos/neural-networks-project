@@ -19,6 +19,7 @@ typedef struct{
 	float input;
 	float output;
 	float* weight;
+	float bias_weight;
 	float error;
 }Neuron;
 
@@ -69,7 +70,7 @@ void initiate_network(){
 		for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{
 			Neuron neuron;
-			
+			neuron.bias_weight = generate_random_float(-1, 1);
 			if(layer_idx == NUM_OF_LAYERS - 1){
 				neuron.weight = (float*) calloc(1, sizeof(float));
 				neuron.weight[0] = 1;
@@ -103,8 +104,8 @@ void print_layer_weights(){
 				{
 					printf("Neuron %d-%d: %f\n", neuron_idx+1, i+1, layers[layer_idx][neuron_idx].weight[i]);	
 				}
-			printf("\n");
 			}
+			printf("Bias weight: %f\n\n", layers[layer_idx][neuron_idx].bias_weight);
 			
 		}
 		printf("\n");
@@ -118,9 +119,10 @@ void forward_pass(float *x, float *y, int k){
 		sum = 0.0;
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{
+
 			for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx-1]; i++)
 			{
-				/* code */
+				
 			}
 			 
 		}
