@@ -11,6 +11,8 @@
 #define H2 3
 #define H3 2
 #define ACTIVATION_FUNC "relu" 
+#define TANH(x) tanh(x)
+#define RELU(x) x > 0 ? 1.0 : -1.0
 #define NUM_OF_HIDDEN_LAYERS 3
 #define NUM_OF_LAYERS NUM_OF_HIDDEN_LAYERS + 2
 #define BIAS 1
@@ -46,7 +48,7 @@ int main(){
 	// 	printf("%f, %f, %f \n", test_dataset[i][0], test_dataset[i][1],\
 	// 	  test_dataset[i][2]);
 	// }	
-
+	//printf("%f\n", RELU(-2));
 	initiate_network();
 	//print_layer_weights();
 	float *y;
