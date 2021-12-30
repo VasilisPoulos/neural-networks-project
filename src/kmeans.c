@@ -42,6 +42,7 @@ void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
 float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset);
 //float kmeans(int num);
 Kmeans* kmeans(int num);
+
 void intialize_clusters(Cluster* cluster_list, float** dataset, int len_of_dataset){
     srand(time(NULL)); 
     Cluster cluster;
@@ -214,16 +215,14 @@ Kmeans* kmeans(int num)
     write_kmeans_clusters_to_file("../out/kmeans_clusters.txt", cluster_list);
     float* error_table = error_calc(cluster_list, dataset, len_dataset);
     float total_error = 0.0;
+    Kmeans temp_km;
     for (int i = 0; i < NUM_OF_CLUSTERS; i++)
     {   
         total_error += error_table[i];
-        kmeans_data->error = total_error;
-        for (ssize_t i = 0; i < NUM_OF_CLUSTERS; i++)
-        {
-            kmeans_data->x = cluster_list[i].x;
-            kmeans_data->y = cluster_list[i].y;
-        }
-
+        temp_km.error = error_table[i];
+        temp_km.x = cluster_list[i].x;
+        temp_km.y = cluster_list[i].y;
+        kmeans_data[i] = temp_km;       
         //printf("Error: %f at cluster %d.\n", error_table[i], i);
     }
     printf("Total error: %f\n", total_error);

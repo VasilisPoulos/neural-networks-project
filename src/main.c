@@ -17,7 +17,9 @@ typedef struct {
     double error;
     double x;
     double y;
-} temp_kmeans;
+} Temp_kmeans;
+
+Temp_kmeans temp_kmeans[NUM_OF_CLUSTERS];
 
 
 
@@ -31,17 +33,24 @@ int main()
 
 void kmeans_generator(){
     float min_error[20] = {0};
-    float min_x[20] = {0};
-    float min_y[20] = {0};
+    float min_x[20][NUM_OF_CLUSTERS] = {0};
+    float min_y[20][NUM_OF_CLUSTERS] = {0};
     int pos = 0;
+    float total_min_error;
     for(int i = 0; i < 20; i++)
     {   
         sleep(1);
-        temp_kmeans* temp;
+        Temp_kmeans* temp;
         temp = kmeans(i);
-        min_error[i] = temp->error;
-        min_x[i] = temp->x;
-        min_y[i] = temp->y;
+        for(int j = 0; j < NUM_OF_CLUSTERS; j++)
+        {
+        total_min_error += temp[j].error;
+        min_x[i][j] = temp[j].x;
+        min_y[i][j] = temp[j].y;
+        printf("For repetition no.%d error is %f\n",j,temp[j].error);
+        }
+        min_error[i] = total_min_error;
+        total_min_error = 0.0;
         //printf("For repetition no.%d error is %f\n",i,min_error[i]);
     }
 
@@ -52,6 +61,10 @@ void kmeans_generator(){
             pos = temp_pos;
         }
     }
-    printf("Minimum error is present at location %d for x = %f and y = %f and its value is %f.\n", pos,min_x[pos],min_y[pos], min_error[pos]);
+    printf("Minimum error is present at location %d and its value is %f.\n", pos,min_error[pos]);
+    for(int j = 0; j < NUM_OF_CLUSTERS; j++)
+    {
+        printf("Minimum error clusters at locations: x = %f and y = %f.\n", min_x[pos][j],min_y[pos][j]);
     }
+}
 
