@@ -13,6 +13,11 @@
 #define ACTIVATION_FUNC "relu" 
 #define TANH(x) tanh(x)
 #define RELU(x) x > 0 ? 1.0 : -1.0
+#define SIG(x) 1/(1 + exp(-x))
+
+#define HIDDEN_LAYER_ACT_FUNC(x) RELU(x)
+#define OUTPUT_LAYER_ACT_FUNC(x) SIG(x)
+
 #define NUM_OF_HIDDEN_LAYERS 3
 #define NUM_OF_LAYERS NUM_OF_HIDDEN_LAYERS + 2
 #define BIAS 1
@@ -38,7 +43,8 @@ int _3layers[] = {D, H1, H2, H3, K};
 
 void initiate_network();
 void print_layer_weights();
-void forward_pass(float *x, float *y, int k);
+void forward_pass(float *x, float **y, int k);
+
 int main(){
 	float** training_dataset = read_file("../data/training_set.txt", LABELED_SET);
 	float** test_dataset = read_file("../data/test_set.txt", LABELED_SET);
@@ -52,10 +58,16 @@ int main(){
 	initiate_network();
 	//print_layer_weights();
 	float *y;
-	float array[] = {0, 1, 0, 1, 1};
+	float array[] = {1, 1, 1, 1, 1};
 	float *x = array;  
-	forward_pass(x, y, 4);
+	forward_pass(x, &y, 4);
 	print_layer_weights();
+
+	for (size_t i = 0; i < 4; i++)
+	{
+		printf("%f\n", y[i]);
+	}
+	free(y);
 	return 0;
 }
 
@@ -120,7 +132,8 @@ void print_layer_weights(){
 	}
 }
 
-void forward_pass(float *x, float *y, int k){
+void forward_pass(float *x, float **y, int k){
+	*y = (float*) malloc(k *sizeof(float));
 	float sum = 0.0;
 	float input = 0.0;
 	float weight = 0.0;
@@ -133,18 +146,24 @@ void forward_pass(float *x, float *y, int k){
 			if(layer_idx == 0){
 				layers[layer_idx][neuron_idx].output = x[neuron_idx];
 			}else{
+				//Calculate the sum of the neurons' output of the previous layer  
 				for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx-1]; i++){
 					neuron = layers[layer_idx-1][i];
 					input = neuron.output;
 					weight = neuron.weight[i];
-					sum += input * weight + neuron.bias_weight * BIAS;
+					sum += input * weight;
 				}
-				layers[layer_idx][neuron_idx].output = sum;	
+				//Add bias of the current neuron
+				//Use the activation function to calculate the output of the current neuron
+				if(layer_idx == NUM_OF_LAYERS -1){
+					layers[layer_idx][neuron_idx].output = 
+						OUTPUT_LAYER_ACT_FUNC(sum + layers[layer_idx][neuron_idx].bias_weight * BIAS);
+					(*y)[neuron_idx] = layers[layer_idx][neuron_idx].output;
+				}else{
+					layers[layer_idx][neuron_idx].output = 
+						HIDDEN_LAYER_ACT_FUNC(sum + layers[layer_idx][neuron_idx].bias_weight * BIAS);
+				} 	
 			}	 
 		}
-		printf("\n");
 	}
-
-
-
 }
