@@ -43,7 +43,7 @@ int _2layers[] = {D, H1, H2, K};
 int _3layers[] = {D, H1, H2, H3, K};
 
 void initiate_network();
-void print_layer_weights();
+void print_layer_info();
 void forward_pass(float *x, float **y, int k);
 void backprop(float *x, int d, float *t, int k);
 void calculate_output_error(float *t, int k);
@@ -63,16 +63,27 @@ int main(){
 	//for kathe epoch
 	// for ola ta paradeimata (4000)
 	forward_pass(x, &y, 4);
+<<<<<<< HEAD
 	print_layer_weights();
 	// backpass
 	// calculate_output_error
 	// (t - neuron.error)^2
+=======
+>>>>>>> 2239c5702761707511147385c295af74dbb21959
 
-	for (size_t i = 0; i < 4; i++)
-	{
-		printf("%f\n", y[i]);
-	}
+	// for (size_t i = 0; i < 4; i++)
+	// {
+	// 	printf("%f\n", y[i]);
+	// }
 	free(y);
+
+	float *output;
+	covert_num_category_output(&output, 1);
+	backprop(x, 2, output, K);
+	print_layer_info();
+	
+	free(output);
+
 
 	return 0;
 }
@@ -113,7 +124,7 @@ void initiate_network(){
 	}	
 }
 
-void print_layer_weights(){
+void print_layer_info(){
 	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
 		if(layer_idx == NUM_OF_LAYERS-1){
@@ -132,7 +143,8 @@ void print_layer_weights(){
 				}
 			}
 			printf("Output: %f\n", layers[layer_idx][neuron_idx].output);
-			printf("Bias weights: %f\n\n", layers[layer_idx][neuron_idx].bias_weight);
+			printf("Bias weights: %f\n", layers[layer_idx][neuron_idx].bias_weight);
+			printf("Neuron error: %f\n\n",  layers[layer_idx][neuron_idx].error);
 		}
 		printf("\n");
 	}
@@ -175,6 +187,7 @@ void forward_pass(float *x, float **y, int k){
 }
 
 void backprop(float *x, int d, float *t, int k){
+	calculate_output_error(t, k);
 	for (size_t layer_idx = NUM_OF_LAYERS-1; layer_idx > 0; layer_idx--)
 	{
 		for (size_t layer_idx = 0; layer_idx < num_of_neurons_per_layer[layer_idx]; layer_idx++)
@@ -190,7 +203,7 @@ void calculate_output_error(float *t, int k){
 	for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[NUM_OF_LAYERS-1]; neuron_idx++)
 	{
 		neuron = layers[NUM_OF_LAYERS-1][neuron_idx];
-		neuron.error = t[neuron_idx] - neuron.output;	
+		layers[NUM_OF_LAYERS-1][neuron_idx].error = t[neuron_idx] - neuron.output;	
 	}
 	
 }
