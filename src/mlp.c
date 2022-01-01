@@ -5,7 +5,7 @@
 #include <math.h>
 #include "utility.h"
 
-#define D 5
+#define D 2
 #define K 4
 #define H1 4
 #define H2 3
@@ -44,22 +44,20 @@ int _3layers[] = {D, H1, H2, H3, K};
 void initiate_network();
 void print_layer_weights();
 void forward_pass(float *x, float **y, int k);
+void backprop(float *x, int d, float *t, int k);
+void calculate_output_error(float *t, int k);
+void covert_num_category_output(float** category_output, int number);
 
 int main(){
 	float** training_dataset = read_file("../data/training_set.txt", LABELED_SET);
 	float** test_dataset = read_file("../data/test_set.txt", LABELED_SET);
 	int training_set_len = get_file_len("../data/training_set.txt");
-	// for (int i = 0; i < training_set_len; i++)
-	// {
-	// 	printf("%f, %f, %f \n", test_dataset[i][0], test_dataset[i][1],\
-	// 	  test_dataset[i][2]);
-	// }	
-	//printf("%f\n", RELU(-2));
-	initiate_network();
-	//print_layer_weights();
+	
 	float *y;
-	float array[] = {1, 1, 1, 1, 1};
-	float *x = array;  
+	float array[] = {1, 1};
+	float *x = array; 
+
+	nitiate_network();
 	forward_pass(x, &y, 4);
 	print_layer_weights();
 
@@ -68,6 +66,7 @@ int main(){
 		printf("%f\n", y[i]);
 	}
 	free(y);
+
 	return 0;
 }
 
@@ -167,3 +166,30 @@ void forward_pass(float *x, float **y, int k){
 		}
 	}
 }
+
+void backprop(float *x, int d, float *t, int k){
+	for (size_t layer_idx = NUM_OF_LAYERS-1; layer_idx > 0; layer_idx--)
+	{
+		for (size_t layer_idx = 0; layer_idx < num_of_neurons_per_layer[layer_idx]; layer_idx++)
+		{
+		
+		}
+		
+	}	
+}
+
+void calculate_output_error(float *t, int k){
+	Neuron neuron;
+	for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[NUM_OF_LAYERS-1]; neuron_idx++)
+	{
+		neuron = layers[NUM_OF_LAYERS-1][neuron_idx];
+		neuron.error = t[neuron_idx] - neuron.output;	
+	}
+	
+}
+
+void covert_num_category_output(float** category_output, int number){
+	*category_output = (float*)calloc(K, sizeof(float));
+	(*category_output)[number-1] = 1.0;	
+}
+
