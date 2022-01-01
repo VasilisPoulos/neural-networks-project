@@ -57,7 +57,7 @@ int main(){
 	float array[] = {1, 1};
 	float *x = array; 
 
-	nitiate_network();
+	initiate_network();
 	forward_pass(x, &y, 4);
 	print_layer_weights();
 
