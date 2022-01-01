@@ -10,8 +10,9 @@
 #define H1 4
 #define H2 3
 #define H3 2
+#define LEARNGING_RATE 0.1
 #define ACTIVATION_FUNC "relu" 
-#define TANH(x) tanh(x)
+#define TANH(x) tanhf(x)
 #define RELU(x) x > 0 ? 1.0 : -1.0
 #define SIG(x) 1/(1 + exp(-x))
 
@@ -58,8 +59,14 @@ int main(){
 	float *x = array; 
 
 	initiate_network();
+
+	//for kathe epoch
+	// for ola ta paradeimata (4000)
 	forward_pass(x, &y, 4);
 	print_layer_weights();
+	// backpass
+	// calculate_output_error
+	// (t - neuron.error)^2
 
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -193,3 +200,22 @@ void covert_num_category_output(float** category_output, int number){
 	(*category_output)[number-1] = 1.0;	
 }
 
+void update_weights(){
+	Neuron neuron;
+	Neuron next_neuron;
+	float dE_dw = 0.0;
+	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
+	{
+		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
+		{
+			neuron = layers[layer_idx][neuron_idx];
+			for (int weight_idx = 0; weight_idx < num_of_neurons_per_layer[layer_idx + 1]; weight_idx++)
+			{
+				next_neuron = layers[layer_idx + 1][weight_idx];
+				dE_dw = next_neuron.error * neuron.output;
+				neuron.weights[weight_idx] = LEARNGING_RATE * dE_dw;
+			}
+			
+		}
+	}
+}
