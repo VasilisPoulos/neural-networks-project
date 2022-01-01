@@ -167,8 +167,6 @@ void forward_pass(float *x, float **y, int k){
 	}
 }
 
-<<<<<<< HEAD
-=======
 void backprop(float *x, int d, float *t, int k){
 	for (size_t layer_idx = NUM_OF_LAYERS-1; layer_idx > 0; layer_idx--)
 	{
@@ -195,4 +193,3 @@ void covert_num_category_output(float** category_output, int number){
 	(*category_output)[number-1] = 1.0;	
 }
 
->>>>>>> refs/remotes/origin/main
