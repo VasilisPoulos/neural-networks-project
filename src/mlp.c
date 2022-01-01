@@ -42,7 +42,7 @@ int _2layers[] = {D, H1, H2, K};
 int _3layers[] = {D, H1, H2, H3, K};
 
 void initiate_network();
-void print_layer_weights();
+void print_layer_info();
 void forward_pass(float *x, float **y, int k);
 void backprop(float *x, int d, float *t, int k);
 void calculate_output_error(float *t, int k);
@@ -59,21 +59,17 @@ int main(){
 
 	initiate_network();
 	forward_pass(x, &y, 4);
-	print_layer_weights();
 
-	for (size_t i = 0; i < 4; i++)
-	{
-		printf("%f\n", y[i]);
-	}
+	// for (size_t i = 0; i < 4; i++)
+	// {
+	// 	printf("%f\n", y[i]);
+	// }
 	free(y);
 
 	float *output;
 	covert_num_category_output(&output, 1);
-	calculate_output_error(output, 4);
-	for (size_t i = 0; i < K; i++)
-	{
-		printf("Error: %f\n", layers[NUM_OF_LAYERS-1][i].error);
-	}
+	backprop(x, 2, output, K);
+	print_layer_info();
 	
 	free(output);
 
@@ -117,7 +113,7 @@ void initiate_network(){
 	}	
 }
 
-void print_layer_weights(){
+void print_layer_info(){
 	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
 		if(layer_idx == NUM_OF_LAYERS-1){
@@ -136,7 +132,8 @@ void print_layer_weights(){
 				}
 			}
 			printf("Output: %f\n", layers[layer_idx][neuron_idx].output);
-			printf("Bias weights: %f\n\n", layers[layer_idx][neuron_idx].bias_weight);
+			printf("Bias weights: %f\n", layers[layer_idx][neuron_idx].bias_weight);
+			printf("Neuron error: %f\n\n",  layers[layer_idx][neuron_idx].error);
 		}
 		printf("\n");
 	}
@@ -179,6 +176,7 @@ void forward_pass(float *x, float **y, int k){
 }
 
 void backprop(float *x, int d, float *t, int k){
+	calculate_output_error(t, k);
 	for (size_t layer_idx = NUM_OF_LAYERS-1; layer_idx > 0; layer_idx--)
 	{
 		for (size_t layer_idx = 0; layer_idx < num_of_neurons_per_layer[layer_idx]; layer_idx++)
