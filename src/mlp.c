@@ -26,7 +26,7 @@
 typedef struct{
 	float input;
 	float output;
-	float* weight;
+	float* weights;
 	float bias_weight;
 	float error;
 }Neuron;
@@ -92,14 +92,14 @@ void initiate_network(){
 			Neuron neuron;
 			neuron.bias_weight = generate_random_float(-1, 1);
 			if(layer_idx == NUM_OF_LAYERS - 1){
-				neuron.weight = (float*) calloc(1, sizeof(float));
-				neuron.weight[0] = 1;
+				neuron.weights = (float*) calloc(1, sizeof(float));
+				neuron.weights[0] = 1;
 			}else{
 				int weight_list_len = num_of_neurons_per_layer[layer_idx + 1];
-				neuron.weight = (float*) calloc(weight_list_len, sizeof(float));
+				neuron.weights = (float*) calloc(weight_list_len, sizeof(float));
 				for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx + 1]; i++)
 				{
-					neuron.weight[i] = generate_random_float(-1, 1);
+					neuron.weights[i] = generate_random_float(-1, 1);
 				}
 			}
 			layers[layer_idx][neuron_idx] = neuron;
@@ -118,15 +118,15 @@ void print_layer_weights(){
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{
 			if((layer_idx == NUM_OF_LAYERS-1)){
-				printf("Neuron %d-1: %f\n", neuron_idx+1, layers[layer_idx][neuron_idx].weight[0]);	
+				printf("Neuron %d-1: %f\n", neuron_idx+1, layers[layer_idx][neuron_idx].weights[0]);	
 			}else{
 				for (int i = 0; i <  num_of_neurons_per_layer[layer_idx + 1]; i++)
 				{
-					printf("Neuron %d-%d: %f\n", neuron_idx+1, i+1, layers[layer_idx][neuron_idx].weight[i]);	
+					printf("Neuron %d-%d: %f\n", neuron_idx+1, i+1, layers[layer_idx][neuron_idx].weights[i]);	
 				}
 			}
 			printf("Output: %f\n", layers[layer_idx][neuron_idx].output);
-			printf("Bias weight: %f\n\n", layers[layer_idx][neuron_idx].bias_weight);
+			printf("Bias weights: %f\n\n", layers[layer_idx][neuron_idx].bias_weight);
 		}
 		printf("\n");
 	}
@@ -136,7 +136,7 @@ void forward_pass(float *x, float **y, int k){
 	*y = (float*) malloc(k *sizeof(float));
 	float sum = 0.0;
 	float input = 0.0;
-	float weight = 0.0;
+	float weights = 0.0;
 	Neuron neuron;
 	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
@@ -150,8 +150,8 @@ void forward_pass(float *x, float **y, int k){
 				for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx-1]; i++){
 					neuron = layers[layer_idx-1][i];
 					input = neuron.output;
-					weight = neuron.weight[i];
-					sum += input * weight;
+					weights = neuron.weights[i];
+					sum += input * weights;
 				}
 				//Add bias of the current neuron
 				//Use the activation function to calculate the output of the current neuron
@@ -167,3 +167,4 @@ void forward_pass(float *x, float **y, int k){
 		}
 	}
 }
+
