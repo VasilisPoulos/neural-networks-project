@@ -11,7 +11,6 @@
 #include <unistd.h>
 #endif
 
-#define NUM_OF_CLUSTERS 10
 
 typedef struct {
     double error;
