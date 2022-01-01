@@ -67,6 +67,17 @@ int main(){
 	}
 	free(y);
 
+	float *output;
+	covert_num_category_output(&output, 1);
+	calculate_output_error(output, 4);
+	for (size_t i = 0; i < K; i++)
+	{
+		printf("Error: %f\n", layers[NUM_OF_LAYERS-1][i].error);
+	}
+	
+	free(output);
+
+
 	return 0;
 }
 
@@ -183,7 +194,7 @@ void calculate_output_error(float *t, int k){
 	for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[NUM_OF_LAYERS-1]; neuron_idx++)
 	{
 		neuron = layers[NUM_OF_LAYERS-1][neuron_idx];
-		neuron.error = t[neuron_idx] - neuron.output;	
+		layers[NUM_OF_LAYERS-1][neuron_idx].error = t[neuron_idx] - neuron.output;	
 	}
 	
 }
