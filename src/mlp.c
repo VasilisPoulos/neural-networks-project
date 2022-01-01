@@ -15,6 +15,10 @@
 #define RELU(x) x > 0 ? 1.0 : -1.0
 #define SIG(x) 1/(1 + exp(-x))
 
+#define RELU_DERIVATIVE(x) x > 0 ? 1.0 : 0.0
+#define SIG_DERIVATIVE(x) x*(1-x)
+#define TANH_DERIVATIVE(x) 1 - tanh(x)*tanh(x)
+
 #define HIDDEN_LAYER_ACT_FUNC(x) RELU(x)
 #define OUTPUT_LAYER_ACT_FUNC(x) SIG(x)
 
@@ -147,9 +151,10 @@ void forward_pass(float *x, float **y, int k){
 	Neuron neuron;
 	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
-		sum = 0.0;	
+	
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{	
+			sum = 0.0;	
 			if(layer_idx == 0){
 				layers[layer_idx][neuron_idx].output = x[neuron_idx];
 			}else{
@@ -176,14 +181,24 @@ void forward_pass(float *x, float **y, int k){
 }
 
 void backprop(float *x, int d, float *t, int k){
+	Neuron next_neuron;
+	Neuron neuron;
+	float sum = 0.0;
 	calculate_output_error(t, k);
-	for (size_t layer_idx = NUM_OF_LAYERS-1; layer_idx > 0; layer_idx--)
+	for (size_t layer_idx = NUM_OF_LAYERS-2; layer_idx > 0; layer_idx--)
 	{
-		for (size_t layer_idx = 0; layer_idx < num_of_neurons_per_layer[layer_idx]; layer_idx++)
-		{
-		
-		}
-		
+
+		for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
+		{	
+			sum = 0.0;
+			neuron = layers[layer_idx][neuron_idx];
+			for (size_t weight_idx = 0; weight_idx < num_of_neurons_per_layer[layer_idx + 1]; weight_idx++)
+			{
+				next_neuron = layers[layer_idx + 1][weight_idx];
+				sum += neuron.weights[weight_idx] * next_neuron.error;  
+			}
+			layers[layer_idx][neuron_idx].error = TANH_DERIVATIVE(neuron.input) * sum;
+		}		
 	}	
 }
 
@@ -192,7 +207,7 @@ void calculate_output_error(float *t, int k){
 	for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[NUM_OF_LAYERS-1]; neuron_idx++)
 	{
 		neuron = layers[NUM_OF_LAYERS-1][neuron_idx];
-		layers[NUM_OF_LAYERS-1][neuron_idx].error = t[neuron_idx] - neuron.output;	
+		layers[NUM_OF_LAYERS-1][neuron_idx].error = SIG_DERIVATIVE(neuron.output) * (neuron.output - t[neuron_idx]);	
 	}
 	
 }
