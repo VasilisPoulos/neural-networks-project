@@ -54,7 +54,9 @@ void forward_pass(float *x, float **y, int k);
 void backprop(float *x, int d, float *t, int k);
 void calculate_output_error(float *t, int k);
 void covert_num_category_output(float** category_output, int number);
+void update_weights(float partial_sum);
 float calculate_partial_der_sum();
+void gradient_descent(float** training_dataset, int size_of_dataset);
 
 int main(){
 	float** training_dataset = read_file("../data/training_set.txt", LABELED_SET);
@@ -66,6 +68,9 @@ int main(){
 	float *x = array; 
 
 	initiate_network();
+
+	
+	/*
 
 	//for kathe epoch
 	// for ola ta paradeimata (4000)
@@ -86,7 +91,9 @@ int main(){
 	backprop(x, 2, output, K);
 	print_layer_info();
 	free(output);
-
+	*/
+	srand(time(NULL));
+	gradient_descent(training_dataset, 4000);
 
 	return 0;
 }
@@ -271,16 +278,36 @@ float calculate_partial_der_sum(){
 }
 
 void gradient_descent(float** training_dataset, int size_of_dataset){
+	float *category;
+	float data[2] = {0};
+	float sum = 0.0;
+	int update_counter = 0;
 
-	
-	for (size_t epoch = 0; epoch < EPOCHS; epoch++)
+	float *y;
+
+	for (size_t epoch = 0; epoch < 1; epoch++)
 	{
-
-		for (size_t i = 0; i < size_of_dataset; i++)
+		sum = 0.0;
+		for (size_t i = 0; i < 1; i++)
 		{
+			covert_num_category_output(&category, training_dataset[i][2]);
+			data[0] = training_dataset[i][0];
+			data[1] = training_dataset[i][1];
+			//printf("%f %f\n", data[0], data[1]);
+			forward_pass(data, &y, 4);
+			backprop(data, 2, category, 4);
+			sum += calculate_partial_der_sum();
+
+			// if(i % 40 == 0){
+			// 	update_weights(sum);
+			// 	update_counter++;
+			// }
 			
 		}
+		//update_weights(sum);
 		
 	}
-	
+	print_layer_info();	
+	printf("%f\n", sum);
+	printf("%d\n", update_counter);
 }
