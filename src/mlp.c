@@ -11,6 +11,8 @@
 #define H2 3
 #define H3 2
 #define LEARNGING_RATE 0.1
+#define EPOCHS 700
+
 #define ACTIVATION_FUNC "relu" 
 #define TANH(x) tanhf(x)
 #define RELU(x) x > 0 ? 1.0 : -1.0
@@ -52,6 +54,7 @@ void forward_pass(float *x, float **y, int k);
 void backprop(float *x, int d, float *t, int k);
 void calculate_output_error(float *t, int k);
 void covert_num_category_output(float** category_output, int number);
+float calculate_partial_der_sum();
 
 int main(){
 	float** training_dataset = read_file("../data/training_set.txt", LABELED_SET);
@@ -67,7 +70,7 @@ int main(){
 	//for kathe epoch
 	// for ola ta paradeimata (4000)
 	forward_pass(x, &y, 4);
-	print_layer_weights();
+	print_layer_info();
 	// backpass
 	// calculate_output_error
 	// (t - neuron.error)^2
@@ -82,7 +85,6 @@ int main(){
 	covert_num_category_output(&output, 1);
 	backprop(x, 2, output, K);
 	print_layer_info();
-	
 	free(output);
 
 
@@ -225,22 +227,60 @@ void covert_num_category_output(float** category_output, int number){
 	(*category_output)[number-1] = 1.0;	
 }
 
-void update_weights(){
+void update_weights(float partial_sum){
 	Neuron neuron;
-	Neuron next_neuron;
 	float dE_dw = 0.0;
 	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{
-			neuron = layers[layer_idx][neuron_idx];
+			//neuron = layers[layer_idx][neuron_idx];
 			for (int weight_idx = 0; weight_idx < num_of_neurons_per_layer[layer_idx + 1]; weight_idx++)
 			{
-				next_neuron = layers[layer_idx + 1][weight_idx];
-				dE_dw = next_neuron.error * neuron.output;
-				neuron.weights[weight_idx] = LEARNGING_RATE * dE_dw;
+				layers[layer_idx][neuron_idx].weights[weight_idx] -= LEARNGING_RATE * partial_sum;
 			}
 			
 		}
 	}
+}
+
+float calculate_partial_der_sum(){
+	float sum = 0.0;
+	Neuron neuron;
+	Neuron next_neuron;
+	for (size_t layer_idx = 1; layer_idx < NUM_OF_LAYERS-1; layer_idx++)
+	{
+		for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
+		{
+			neuron = layers[layer_idx][neuron_idx];
+			for (size_t weight_idx = 0; weight_idx < num_of_neurons_per_layer[layer_idx + 1]; weight_idx++)
+			{
+				next_neuron = layers[layer_idx + 1][weight_idx];
+				sum += next_neuron.error * neuron.output;
+			}
+			sum += neuron.error; 
+		}
+	}
+
+	for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[NUM_OF_LAYERS-1]; neuron_idx++)
+	{
+		sum += layers[NUM_OF_LAYERS-1][neuron_idx].error;
+	}
+
+	return sum;
+}
+
+void gradient_descent(float** training_dataset, int size_of_dataset){
+
+	
+	for (size_t epoch = 0; epoch < EPOCHS; epoch++)
+	{
+
+		for (size_t i = 0; i < size_of_dataset; i++)
+		{
+			
+		}
+		
+	}
+	
 }
