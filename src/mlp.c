@@ -6,10 +6,10 @@
 #include "utility.h"
 
 #define D 2
-#define K 4
-#define H1 4
-#define H2 3
+#define H1 2
+#define H2 2
 #define H3 2
+#define K 2
 #define LEARNGING_RATE 0.1
 #define EPOCHS 700
 
@@ -25,10 +25,9 @@
 #define HIDDEN_LAYER_ACT_FUNC(x) RELU(x)
 #define OUTPUT_LAYER_ACT_FUNC(x) SIG(x)
 
-#define NUM_OF_HIDDEN_LAYERS 3
+#define NUM_OF_HIDDEN_LAYERS 2
 #define NUM_OF_LAYERS NUM_OF_HIDDEN_LAYERS + 2
 #define BIAS 1
-
 
 typedef struct{
 	float input;
@@ -68,7 +67,6 @@ int main(){
 	float *x = array; 
 
 	initiate_network();
-
 	
 	/*
 
@@ -92,8 +90,14 @@ int main(){
 	print_layer_info();
 	free(output);
 	*/
+	float data[2] = {0};
+	data[0] = training_dataset[0][0];
+	data[1] = training_dataset[0][1];
+	printf("actual input %f, %f\n", data[0], data[1]);
 	srand(time(NULL));
-	gradient_descent(training_dataset, 4000);
+	forward_pass(data, &y, 4);
+	print_layer_info();
+	// gradient_descent(training_dataset, 4000);
 
 	return 0;
 }
@@ -152,6 +156,7 @@ void print_layer_info(){
 					printf("Neuron %d-%d: %f\n", neuron_idx+1, i+1, layers[layer_idx][neuron_idx].weights[i]);	
 				}
 			}
+			printf("Input: %f\n", layers[layer_idx][neuron_idx].input);
 			printf("Output: %f\n", layers[layer_idx][neuron_idx].output);
 			printf("Bias weights: %f\n", layers[layer_idx][neuron_idx].bias_weight);
 			printf("Neuron error: %f\n\n",  layers[layer_idx][neuron_idx].error);
@@ -165,23 +170,27 @@ void forward_pass(float *x, float **y, int k){
 	float sum = 0.0;
 	float input = 0.0;
 	float weights = 0.0;
-	Neuron neuron;
+	Neuron previous_neuron;
 	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
-	
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{	
 			sum = 0.0;	
 			if(layer_idx == 0){
-				layers[layer_idx][neuron_idx].output = x[neuron_idx];
+				// For the first 'virtual' layer, the networks input is passed 
+				// to the layers output.
+				layers[layer_idx][neuron_idx].input = x[neuron_idx];
+				layers[layer_idx][neuron_idx].output = \
+					layers[layer_idx][neuron_idx].input;
 			}else{
-				//Calculate the sum of the neurons' output of the previous layer  
-				for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx-1]; i++){
-					neuron = layers[layer_idx-1][i];
-					input = neuron.output;
-					weights = neuron.weights[i];
-					sum += input * weights;
+				// For the hidden layers.
+				// Calculate the sum of the neurons' output of the previous 
+				// layer.  
+				for (size_t previous_idx = 0; previous_idx < num_of_neurons_per_layer[layer_idx-1]; previous_idx++){
+					previous_neuron = layers[layer_idx - 1][previous_idx];
+					sum += previous_neuron.output * previous_neuron.weights[neuron_idx];
 				}
+				layers[layer_idx][neuron_idx].input = sum + layers[layer_idx][neuron_idx].bias_weight * BIAS;
 				//Add bias of the current neuron
 				//Use the activation function to calculate the output of the current neuron
 				if(layer_idx == NUM_OF_LAYERS -1){
@@ -235,13 +244,10 @@ void covert_num_category_output(float** category_output, int number){
 }
 
 void update_weights(float partial_sum){
-	Neuron neuron;
-	float dE_dw = 0.0;
 	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{
-			//neuron = layers[layer_idx][neuron_idx];
 			for (int weight_idx = 0; weight_idx < num_of_neurons_per_layer[layer_idx + 1]; weight_idx++)
 			{
 				layers[layer_idx][neuron_idx].weights[weight_idx] -= LEARNGING_RATE * partial_sum;
@@ -288,7 +294,7 @@ void gradient_descent(float** training_dataset, int size_of_dataset){
 	for (size_t epoch = 0; epoch < 1; epoch++)
 	{
 		sum = 0.0;
-		for (size_t i = 0; i < 1; i++)
+		for (size_t i = 0; i < 100; i++)
 		{
 			covert_num_category_output(&category, training_dataset[i][2]);
 			data[0] = training_dataset[i][0];
@@ -298,10 +304,10 @@ void gradient_descent(float** training_dataset, int size_of_dataset){
 			backprop(data, 2, category, 4);
 			sum += calculate_partial_der_sum();
 
-			// if(i % 40 == 0){
-			// 	update_weights(sum);
-			// 	update_counter++;
-			// }
+			if(i % 1 == 0){
+				update_weights(sum);
+				update_counter++;
+			}
 			
 		}
 		//update_weights(sum);
