@@ -317,3 +317,16 @@ void gradient_descent(float** training_dataset, int size_of_dataset){
 	printf("%f\n", sum);
 	printf("%d\n", update_counter);
 }
+
+float square_error(float *t,int k){
+	Neuron neuron;
+	float temp_error;
+	float sum;
+	for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[NUM_OF_LAYERS-1]; neuron_idx++)
+	{
+		temp_error = pow(t[neuron_idx] - layers[NUM_OF_LAYERS-1][neuron_idx].error,2);	
+		sum += temp_error;
+	}
+	sum = 0.5*sum;
+	return sum;	
+}
