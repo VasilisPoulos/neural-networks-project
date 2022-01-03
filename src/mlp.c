@@ -12,7 +12,8 @@
 #define K 4
 #define LEARNGING_RATE 0.05
 #define BATCH_SIZE 4000
-#define EPOCHS 700
+#define MINIMUM_EPOCHS 700
+#define TERMINATION_THRESHOLD 50
 
 #define ACTIVATION_FUNC "relu" 
 #define TANH(x) tanhf(x)
@@ -246,9 +247,12 @@ void gradient_descent(float** training_dataset, int size_of_dataset){
 	float label_array[K] = {0};
 	float *y;
 	float total_error = 0.0;
+	float previous_total_error = 0.0;
+	long int epoch = 0;
 
-	for (size_t epoch = 0; epoch < EPOCHS; epoch++)
+	while(1)
 	{
+		previous_total_error = total_error;
 		total_error = 0.0;
 		for (size_t i = 0; i < 4000; i++)
 		{
@@ -265,6 +269,11 @@ void gradient_descent(float** training_dataset, int size_of_dataset){
 		}
 		total_error = 0.5 * total_error;
 		printf("epoch %ld, error: %f\n", epoch + 1, total_error);
+		epoch++;
+		if(epoch > MINIMUM_EPOCHS && abs(previous_total_error - total_error)< TERMINATION_THRESHOLD ){
+			break;
+		}
+
 	}
 	print_layer_info();	
 }
