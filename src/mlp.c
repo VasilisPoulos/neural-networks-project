@@ -9,7 +9,7 @@
 #define H1 2
 #define H2 2
 #define H3 2
-#define K 2
+#define K 4
 #define LEARNGING_RATE 0.1
 #define EPOCHS 700
 
@@ -52,53 +52,31 @@ void print_layer_info();
 void forward_pass(float *x, float **y, int k);
 void backprop(float *x, int d, float *t, int k);
 void calculate_output_error(float *t, int k);
-void covert_num_category_output(float** category_output, int number);
+void covert_label_to_array(float* array, int label);
 void update_weights(float partial_sum);
 float calculate_partial_der_sum();
-void gradient_descent(float** training_dataset, int size_of_dataset);
+// void gradient_descent(float** training_dataset, int size_of_dataset);
 
 int main(){
 	float** training_dataset = read_file("../data/training_set.txt", LABELED_SET);
 	float** test_dataset = read_file("../data/test_set.txt", LABELED_SET);
 	int training_set_len = get_file_len("../data/training_set.txt");
-	
-	float *y;
+
 	float array[] = {1, 1};
 	float *x = array; 
-
-	initiate_network();
-	
-	/*
-
-	//for kathe epoch
-	// for ola ta paradeimata (4000)
-	forward_pass(x, &y, 4);
-	print_layer_info();
-	// backpass
-	// calculate_output_error
-	// (t - neuron.error)^2
-
-	// for (size_t i = 0; i < 4; i++)
-	// {
-	// 	printf("%f\n", y[i]);
-	// }
-	free(y);
-
-	float *output;
-	covert_num_category_output(&output, 1);
-	backprop(x, 2, output, K);
-	print_layer_info();
-	free(output);
-	*/
 	float data[2] = {0};
 	data[0] = training_dataset[0][0];
 	data[1] = training_dataset[0][1];
-	printf("actual input %f, %f\n", data[0], data[1]);
-	srand(time(NULL));
-	forward_pass(data, &y, 4);
-	print_layer_info();
-	// gradient_descent(training_dataset, 4000);
+	float label = training_dataset[0][2];
 
+	srand(time(NULL));
+	initiate_network();
+	float cat[K] = {0};
+	covert_label_to_array(cat, data[2]);
+	//forward_pass(x, &y, K);
+	backprop(data, D, cat, K);
+	printf("actual input %f, %f, %f\n", data[0], data[1], label);
+	print_layer_info();
 	return 0;
 }
 
@@ -167,7 +145,7 @@ void print_layer_info(){
 
 void forward_pass(float *x, float **y, int k){
 	*y = (float*) malloc(k *sizeof(float));
-	float sum = 0.0;
+	float total_input = 0.0;
 	float input = 0.0;
 	float weights = 0.0;
 	Neuron previous_neuron;
@@ -175,7 +153,7 @@ void forward_pass(float *x, float **y, int k){
 	{
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{	
-			sum = 0.0;	
+			total_input = 0.0;	
 			if(layer_idx == 0){
 				// For the first 'virtual' layer, the networks input is passed 
 				// to the layers output.
@@ -188,18 +166,19 @@ void forward_pass(float *x, float **y, int k){
 				// layer.  
 				for (size_t previous_idx = 0; previous_idx < num_of_neurons_per_layer[layer_idx-1]; previous_idx++){
 					previous_neuron = layers[layer_idx - 1][previous_idx];
-					sum += previous_neuron.output * previous_neuron.weights[neuron_idx];
+					total_input += \
+						previous_neuron.output * previous_neuron.weights[neuron_idx];
 				}
-				layers[layer_idx][neuron_idx].input = sum + layers[layer_idx][neuron_idx].bias_weight * BIAS;
+				layers[layer_idx][neuron_idx].input = total_input + layers[layer_idx][neuron_idx].bias_weight * BIAS;
 				//Add bias of the current neuron
 				//Use the activation function to calculate the output of the current neuron
 				if(layer_idx == NUM_OF_LAYERS -1){
 					layers[layer_idx][neuron_idx].output = 
-						OUTPUT_LAYER_ACT_FUNC(sum + layers[layer_idx][neuron_idx].bias_weight * BIAS);
+						OUTPUT_LAYER_ACT_FUNC(total_input + layers[layer_idx][neuron_idx].bias_weight * BIAS);
 					(*y)[neuron_idx] = layers[layer_idx][neuron_idx].output;
 				}else{
 					layers[layer_idx][neuron_idx].output = 
-						HIDDEN_LAYER_ACT_FUNC(sum + layers[layer_idx][neuron_idx].bias_weight * BIAS);
+						HIDDEN_LAYER_ACT_FUNC(total_input + layers[layer_idx][neuron_idx].bias_weight * BIAS);
 				} 	
 			}	 
 		}
@@ -210,10 +189,12 @@ void backprop(float *x, int d, float *t, int k){
 	Neuron next_neuron;
 	Neuron neuron;
 	float sum = 0.0;
+	float *y;
+	
+	forward_pass(x, &y, K);
 	calculate_output_error(t, k);
 	for (size_t layer_idx = NUM_OF_LAYERS-2; layer_idx > 0; layer_idx--)
 	{
-
 		for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{	
 			sum = 0.0;
@@ -238,9 +219,8 @@ void calculate_output_error(float *t, int k){
 	
 }
 
-void covert_num_category_output(float** category_output, int number){
-	*category_output = (float*)calloc(K, sizeof(float));
-	(*category_output)[number-1] = 1.0;	
+void covert_label_to_array(float* array, int label){
+	array[label - 1] = 1;
 }
 
 void update_weights(float partial_sum){
@@ -283,40 +263,40 @@ float calculate_partial_der_sum(){
 	return sum;
 }
 
-void gradient_descent(float** training_dataset, int size_of_dataset){
-	float *category;
-	float data[2] = {0};
-	float sum = 0.0;
-	int update_counter = 0;
+// void gradient_descent(float** training_dataset, int size_of_dataset){
+// 	float *category;
+// 	float data[2] = {0};
+// 	float sum = 0.0;
+// 	int update_counter = 0;
 
-	float *y;
+// 	float *y;
 
-	for (size_t epoch = 0; epoch < 1; epoch++)
-	{
-		sum = 0.0;
-		for (size_t i = 0; i < 100; i++)
-		{
-			covert_num_category_output(&category, training_dataset[i][2]);
-			data[0] = training_dataset[i][0];
-			data[1] = training_dataset[i][1];
-			//printf("%f %f\n", data[0], data[1]);
-			forward_pass(data, &y, 4);
-			backprop(data, 2, category, 4);
-			sum += calculate_partial_der_sum();
+// 	for (size_t epoch = 0; epoch < 1; epoch++)
+// 	{
+// 		sum = 0.0;
+// 		for (size_t i = 0; i < 100; i++)
+// 		{
+// 			covert_label_to_array(&category, training_dataset[i][2]);
+// 			data[0] = training_dataset[i][0];
+// 			data[1] = training_dataset[i][1];
+// 			//printf("%f %f\n", data[0], data[1]);
+// 			forward_pass(data, &y, 4);
+// 			backprop(data, 2, category, 4);
+// 			sum += calculate_partial_der_sum();
 
-			if(i % 1 == 0){
-				update_weights(sum);
-				update_counter++;
-			}
+// 			if(i % 1 == 0){
+// 				update_weights(sum);
+// 				update_counter++;
+// 			}
 			
-		}
-		//update_weights(sum);
+// 		}
+// 		//update_weights(sum);
 		
-	}
-	print_layer_info();	
-	printf("%f\n", sum);
-	printf("%d\n", update_counter);
-}
+// 	}
+// 	print_layer_info();	
+// 	printf("%f\n", sum);
+// 	printf("%d\n", update_counter);
+// }
 
 float square_error(float *t,int k){
 	Neuron neuron;

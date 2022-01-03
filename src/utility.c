@@ -4,6 +4,7 @@
 #include <time.h>
 #include <math.h>
 # define LABELED_SET 1
+
 float generate_random_float(float lowest, float highest) {
 	float scale = rand() / (float) RAND_MAX;
 	return lowest + scale * (highest - lowest);
