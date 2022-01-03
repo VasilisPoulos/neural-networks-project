@@ -38,6 +38,7 @@ typedef struct{
 	float input;
 	float output;
 	float* weights;
+	float* derivatives;
 	float bias_weight;
 	float error;
 }Neuron;
@@ -109,6 +110,7 @@ void initiate_network(){
 			}else{
 				int weight_list_len = num_of_neurons_per_layer[layer_idx + 1];
 				neuron.weights = (float*) calloc(weight_list_len, sizeof(float));
+				neuron.derivatives = (float*) calloc(weight_list_len, sizeof(float));
 				for (size_t i = 0; i < num_of_neurons_per_layer[layer_idx + 1]; i++)
 				{
 					neuron.weights[i] = generate_random_float(-1, 1);
