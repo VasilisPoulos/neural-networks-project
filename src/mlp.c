@@ -6,13 +6,14 @@
 #include "utility.h"
 
 #define D 2
-#define H1 4
+#define H1 8
 #define H2 4
 #define H3 4
 #define K 4
-#define LEARNGING_RATE 0.05
-#define BATCH_SIZE 4000
-#define EPOCHS 700
+#define LEARNGING_RATE 0.1
+#define BATCH_SIZE 1
+#define MINIMUM_EPOCHS 700
+#define TERMINATION_THRESHOLD 0.1
 
 #define ACTIVATION_FUNC "relu" 
 #define TANH(x) tanhf(x)
@@ -226,16 +227,21 @@ void covert_label_to_array(float* array, int label){
 
 void update_weights(){
 	float partial_derivative = 0.0;
+	float bias_partial_derivative = 0.0;
 	Neuron *currect_neuron;
 	Neuron *next_layer_neuron;
 	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS - 1; layer_idx++)
 	{
 		for (int neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
 		{
+			currect_neuron = &layers[layer_idx][neuron_idx];
+			next_layer_neuron = &layers[layer_idx + 1][neuron_idx];
+
+			bias_partial_derivative = currect_neuron->error;
+			currect_neuron->bias_weight -= LEARNGING_RATE * partial_derivative;
+
 			for (int weight_idx = 0; weight_idx < num_of_neurons_per_layer[layer_idx + 1]; weight_idx++)
 			{
-				currect_neuron = &layers[layer_idx][neuron_idx];
-				next_layer_neuron = &layers[layer_idx + 1][neuron_idx];
 				partial_derivative = currect_neuron->error * next_layer_neuron->output;
 				currect_neuron->weights[weight_idx] -= LEARNGING_RATE * partial_derivative;
 			}	
@@ -248,9 +254,12 @@ void gradient_descent(float** training_dataset, int size_of_dataset){
 	float label_array[K] = {0};
 	float *y;
 	float total_error = 0.0;
+	float previous_total_error = 0.0;
+	long int epoch = 0;
 
-	for (size_t epoch = 0; epoch < EPOCHS; epoch++)
+	while(1)
 	{
+		previous_total_error = total_error;
 		total_error = 0.0;
 		for (size_t i = 0; i < 4000; i++)
 		{
@@ -267,6 +276,11 @@ void gradient_descent(float** training_dataset, int size_of_dataset){
 		}
 		total_error = 0.5 * total_error;
 		printf("epoch %ld, error: %f\n", epoch + 1, total_error);
+		epoch++;
+		if(epoch > MINIMUM_EPOCHS && abs(previous_total_error - total_error)< TERMINATION_THRESHOLD ){
+			break;
+		}
+
 	}
 	print_layer_info();	
 }
