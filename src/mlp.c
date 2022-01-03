@@ -6,8 +6,8 @@
 #include "utility.h"
 
 #define D 2
-#define H1 8
-#define H2 4
+#define H1 10
+#define H2 10
 #define H3 4
 #define K 4
 #define LEARNGING_RATE 0.1
@@ -61,6 +61,8 @@ void covert_label_to_array(float* array, int label);
 void update_weights();
 void gradient_descent(float** training_dataset, int size_of_dataset);
 float square_error(float *t);
+void test_network(float** test_dataset, int size_of_dataset);
+float output_category(float *output);
 
 int main(){
 	float** training_dataset = read_file("../data/training_set.txt", LABELED_SET);
@@ -77,6 +79,7 @@ int main(){
 	srand(time(NULL));
 	initiate_network();
 	gradient_descent(training_dataset, 4000);
+	test_network(test_dataset, 4000);
 	return 0;
 }
 
@@ -292,4 +295,36 @@ float square_error(float *t){
 		output_error += pow(t[neuron_idx] - current_neuron->error,2);
 	}
 	return output_error;	
+}
+
+void test_network(float** test_dataset, int size_of_dataset){
+	float *output;
+	float data[2] = {0};
+	float category = 0.0;
+	int correct = 0;
+
+	for (size_t i = 0; i < size_of_dataset; i++)
+	{	
+		data[0] = test_dataset[i][0];
+		data[1] = test_dataset[i][1];
+		forward_pass(data, &output, 2);
+		category = output_category(output);
+		if(category == test_dataset[i][2]){
+			correct++;
+		}
+	}	
+	printf("Correct: %.2f%% \n", ((float)correct/(float)size_of_dataset)*100);
+}
+
+float output_category(float *output){
+	int category = 0;
+	float value = 0.0;
+	for (size_t i = 0; i < K; i++)
+	{
+		if(output[i] > value){
+			category = i;
+			value = output[i];
+		}	
+	}
+	return (float) category + 1;
 }
