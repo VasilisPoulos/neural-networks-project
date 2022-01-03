@@ -25,6 +25,9 @@
 #define HIDDEN_LAYER_ACT_FUNC(x) RELU(x)
 #define OUTPUT_LAYER_ACT_FUNC(x) SIG(x)
 
+#define HIDDEN_LAYER_DERIVATIVE(x) RELU_DERIVATIVE(x)
+#define OUTPUT_LAYER_DERIVATIVE(x) SIG_DERIVATIVE(x) 
+
 #define NUM_OF_HIDDEN_LAYERS 2
 #define NUM_OF_LAYERS NUM_OF_HIDDEN_LAYERS + 2
 #define BIAS 1
@@ -54,8 +57,7 @@ void backprop(float *x, int d, float *t, int k);
 void calculate_output_error(float *t, int k);
 void covert_label_to_array(float* array, int label);
 void update_weights(float partial_sum);
-float calculate_partial_der_sum();
-// void gradient_descent(float** training_dataset, int size_of_dataset);
+void gradient_descent(float** training_dataset, int size_of_dataset);
 
 int main(){
 	float** training_dataset = read_file("../data/training_set.txt", LABELED_SET);
@@ -71,12 +73,7 @@ int main(){
 
 	srand(time(NULL));
 	initiate_network();
-	float cat[K] = {0};
-	covert_label_to_array(cat, data[2]);
-	//forward_pass(x, &y, K);
-	backprop(data, D, cat, K);
-	printf("actual input %f, %f, %f\n", data[0], data[1], label);
-	print_layer_info();
+	gradient_descent(training_dataset, 4000);
 	return 0;
 }
 
@@ -186,37 +183,37 @@ void forward_pass(float *x, float **y, int k){
 }
 
 void backprop(float *x, int d, float *t, int k){
-	Neuron next_neuron;
-	Neuron neuron;
+	Neuron* next_neuron;
+	Neuron* neuron;
 	float sum = 0.0;
 	float *y;
 	
 	forward_pass(x, &y, K);
 	calculate_output_error(t, k);
-	for (size_t layer_idx = NUM_OF_LAYERS-2; layer_idx > 0; layer_idx--)
+	for (size_t hlayer_idx = NUM_OF_HIDDEN_LAYERS; hlayer_idx > 0; hlayer_idx--)
 	{
-		for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
+		for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[hlayer_idx]; neuron_idx++)
 		{	
 			sum = 0.0;
-			neuron = layers[layer_idx][neuron_idx];
-			for (size_t weight_idx = 0; weight_idx < num_of_neurons_per_layer[layer_idx + 1]; weight_idx++)
+			neuron = &layers[hlayer_idx][neuron_idx];
+			for (size_t weight_idx = 0; weight_idx < num_of_neurons_per_layer[hlayer_idx + 1]; weight_idx++)
 			{
-				next_neuron = layers[layer_idx + 1][weight_idx];
-				sum += neuron.weights[weight_idx] * next_neuron.error;  
-			}
-			layers[layer_idx][neuron_idx].error = TANH_DERIVATIVE(neuron.input) * sum;
+				next_neuron = &layers[hlayer_idx + 1][weight_idx];
+				sum += neuron->weights[weight_idx] * next_neuron->error;  
+			}		
+			neuron->error = HIDDEN_LAYER_DERIVATIVE(neuron->input) * sum;
 		}		
 	}	
 }
 
 void calculate_output_error(float *t, int k){
 	Neuron neuron;
-	for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[NUM_OF_LAYERS-1]; neuron_idx++)
+	for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[NUM_OF_LAYERS - 1]; neuron_idx++)
 	{
-		neuron = layers[NUM_OF_LAYERS-1][neuron_idx];
-		layers[NUM_OF_LAYERS-1][neuron_idx].error = SIG_DERIVATIVE(neuron.output) * (neuron.output - t[neuron_idx]);	
-	}
-	
+		neuron = layers[NUM_OF_LAYERS - 1][neuron_idx];
+		layers[NUM_OF_LAYERS - 1][neuron_idx].error = \
+			OUTPUT_LAYER_DERIVATIVE(neuron.output) * (neuron.output - t[neuron_idx]);	
+	}	
 }
 
 void covert_label_to_array(float* array, int label){
@@ -231,72 +228,37 @@ void update_weights(float partial_sum){
 			for (int weight_idx = 0; weight_idx < num_of_neurons_per_layer[layer_idx + 1]; weight_idx++)
 			{
 				layers[layer_idx][neuron_idx].weights[weight_idx] -= LEARNGING_RATE * partial_sum;
-			}
-			
+			}	
 		}
 	}
 }
 
-float calculate_partial_der_sum(){
+void gradient_descent(float** training_dataset, int size_of_dataset){
+	float *category;
+	float data[2] = {0};
 	float sum = 0.0;
-	Neuron neuron;
-	Neuron next_neuron;
-	for (size_t layer_idx = 1; layer_idx < NUM_OF_LAYERS-1; layer_idx++)
+	float label_array[K] = {0};
+	float *y;
+
+	for (size_t epoch = 0; epoch < 1; epoch++)
 	{
-		for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[layer_idx]; neuron_idx++)
+		sum = 0.0;
+		for (size_t i = 0; i < 1; i++)
 		{
-			neuron = layers[layer_idx][neuron_idx];
-			for (size_t weight_idx = 0; weight_idx < num_of_neurons_per_layer[layer_idx + 1]; weight_idx++)
-			{
-				next_neuron = layers[layer_idx + 1][weight_idx];
-				sum += next_neuron.error * neuron.output;
-			}
-			sum += neuron.error; 
+			memset(label_array, 0, sizeof(label_array));
+			covert_label_to_array(label_array, training_dataset[i][2]);
+			data[0] = training_dataset[i][0];
+			data[1] = training_dataset[i][1];
+			backprop(data, 2, category, 4);
+
+			// if(i % 0 == 0){
+			// 	update_weights(sum);
+			// }
 		}
 	}
-
-	for (size_t neuron_idx = 0; neuron_idx < num_of_neurons_per_layer[NUM_OF_LAYERS-1]; neuron_idx++)
-	{
-		sum += layers[NUM_OF_LAYERS-1][neuron_idx].error;
-	}
-
-	return sum;
+	print_layer_info();	
+	printf("%f\n", sum);
 }
-
-// void gradient_descent(float** training_dataset, int size_of_dataset){
-// 	float *category;
-// 	float data[2] = {0};
-// 	float sum = 0.0;
-// 	int update_counter = 0;
-
-// 	float *y;
-
-// 	for (size_t epoch = 0; epoch < 1; epoch++)
-// 	{
-// 		sum = 0.0;
-// 		for (size_t i = 0; i < 100; i++)
-// 		{
-// 			covert_label_to_array(&category, training_dataset[i][2]);
-// 			data[0] = training_dataset[i][0];
-// 			data[1] = training_dataset[i][1];
-// 			//printf("%f %f\n", data[0], data[1]);
-// 			forward_pass(data, &y, 4);
-// 			backprop(data, 2, category, 4);
-// 			sum += calculate_partial_der_sum();
-
-// 			if(i % 1 == 0){
-// 				update_weights(sum);
-// 				update_counter++;
-// 			}
-			
-// 		}
-// 		//update_weights(sum);
-		
-// 	}
-// 	print_layer_info();	
-// 	printf("%f\n", sum);
-// 	printf("%d\n", update_counter);
-// }
 
 float square_error(float *t,int k){
 	Neuron neuron;
