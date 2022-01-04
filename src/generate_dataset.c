@@ -14,17 +14,17 @@
 
 int select_category(float x1, float x2) {
 	if (pow((x1 - 0.5), 2) + pow((x2 - 0.5), 2) < 0.16 ){
-		return 1;
+		return 0;
 	}else if (pow((x1 + 0.5), 2) + pow((x2 + 0.5), 2) < 0.16){
-		return 1;
+		return 0;
 	}else if (pow((x1 - 0.5), 2) + pow((x2 + 0.5), 2) < 0.16){
-		return 2;
+		return 1;
 	}else if (pow((x1 + 0.5), 2) + pow((x2 - 0.5), 2) < 0.16){
-		return 2;
+		return 1;
 	}else if ((x1 < 0 && x2 > 0) || (x1 > 0 && x2 < 0)){
-		return 3;
+		return 2;
 	}else {
-		return 4;
+		return 3;
 	}
 }
 
@@ -33,9 +33,9 @@ float propability(){
 }
 
 int change_category(int current_category){
-	int new_category = (rand() % 5);
+	int new_category = (rand() % 3);
 	while(new_category == current_category){
-		new_category = (rand() % 5);
+		new_category = (rand() % 3);
 	}
 	return new_category;
 }
