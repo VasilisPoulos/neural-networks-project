@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.lang.Math;
+import java.util.Arrays;
 
 public class Mlp {
     int numberOfLayers;
@@ -52,18 +53,16 @@ public class Mlp {
     }
 
     private double outputLayerFunction(double input){
-        return 0;
+        return sig(input);
     }
 
-    private ArrayList<Double> forwardPass(ArrayList<Double> networkInput){
+    private double[] forwardPass(double networkInput[]){
         double weightedSum = 0;
-        double input = 0;
-        double weights = 0;
         Neuron previousNeuron;
         Neuron currentNeuron;
-        ArrayList<Double> networkOutput = new ArrayList<>();
+        double[] networkOutput = new double[K];
 
-        for (int layerId = 0; layerId < numberOfLayers; layerId++)
+        for (int layerId = 0; layerId < numberOfLayers + 2; layerId++)
         {
             for (int neuronId = 0; neuronId < layerSize.get(layerId); neuronId++)
             {
@@ -71,7 +70,7 @@ public class Mlp {
                 if(layerId == 0){
                     // For the first 'virtual' layer, the networks input is passed
                     // to the layers output.
-                    currentNeuron.input = networkInput.get(neuronId);
+                    currentNeuron.input = networkInput[neuronId];
                     currentNeuron.output = currentNeuron.input;
                 }else{
                     // For the hidden layers.
@@ -82,14 +81,17 @@ public class Mlp {
                         weightedSum +=
                             previousNeuron.output * previousNeuron.weights.get(neuronId);
                     }
-                    currentNeuron.input = weightedSum + currentNeuron.biasWeight * BIAS;
+                    currentNeuron.input = weightedSum;
 
                     //Use the activation function to calculate the output of the current neuron.
-                    if(layerId == numberOfLayers - 1){
-                        currentNeuron.output = outputLayerFunction(currentNeuron.input);
-                        networkOutput.add(currentNeuron.output);
+                    if(layerId == numberOfLayers + 1){
+                        System.out.println("AAXXAXAAXXAXAAXAX" +neuronId);
+                        currentNeuron.output =
+                                outputLayerFunction(currentNeuron.input + currentNeuron.biasWeight * BIAS);
+                        networkOutput[neuronId] = currentNeuron.output;
                     }else{
-                        currentNeuron.output = hiddenLayerFunction(currentNeuron.input);
+                        currentNeuron.output =
+                                hiddenLayerFunction(currentNeuron.input + currentNeuron.biasWeight * BIAS);
                     }
                 }
             }
@@ -105,6 +107,7 @@ public class Mlp {
             numOfnextLayerNeurons = layers.get(layerId + 1).size();
 
             for (Neuron neuron: layers.get(layerId)){
+                neuron.biasWeight = getRandomNumber(-1, 1);
                 for (int weightId = 0; weightId < numOfnextLayerNeurons; weightId++) {
                     randomWeight = getRandomNumber(-1, 1);
                     neuron.weights.add(randomWeight);
@@ -113,6 +116,7 @@ public class Mlp {
         }
         for (Neuron neuron: layers.get(numberOfLayers + 1)){
             neuron.weights.add(1.0);
+            neuron.biasWeight = getRandomNumber(-1, 1);
         }
     }
 
@@ -136,6 +140,9 @@ public class Mlp {
                 System.out.println("Neuron " + neuronId);
                 neuron = layers.get(layerId).get(neuronId);
                 System.out.print("Weights: " + neuron.weights + "\n");
+                System.out.println("Input:" + neuron.input);
+                System.out.println("Output:" + neuron.output);
+                System.out.println("Bias Weight: " + neuron.biasWeight);
                 System.out.println();
             }
             System.out.println();
@@ -145,8 +152,13 @@ public class Mlp {
     public static void main(String[] args) {
 
         Mlp mlp = new Mlp(2);
-
         mlp.initWeights();
+
+        double input[] = {0.161762, -0.797997};
+        double[] output =  mlp.forwardPass(input);
         mlp.printLayerInfo();
+        System.out.println(Arrays.toString(output));
+
+        //System.out.println(mlp.relu(1.0) + " " + mlp.relu(-1.0));
     }
 }
