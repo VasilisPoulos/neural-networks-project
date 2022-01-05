@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.lang.Math;
-import java.util.Arrays;
 
 public class Mlp {
     int numberOfLayers;
@@ -11,7 +10,7 @@ public class Mlp {
     int K = 4;
     int BIAS = 1;
     ArrayList<Integer> layerSize = new ArrayList<>();
-    double LEARNGING_RATE = 0.01;
+    double LEARNING_RATE = 0.01;
     int BATCH_SIZE = 4000;
     int MINIMUM_EPOCHS = 700;
     double TERMINATION_THRESHOLD = 0.1;
@@ -54,6 +53,10 @@ public class Mlp {
 
     private double sig_derivative(double input){
         return input * (1.0 - input);
+    }
+
+    private double tanh_derivative(double input){
+        return 1.0 - (Math.tanh(input) * Math.tanh(input));
     }
 
     private double getRandomNumber(double lower, double upper){
@@ -186,6 +189,29 @@ public class Mlp {
                 }
             }		
         }	
+    }
+
+    private void update_weights(){
+        Neuron currentNeuron;
+        double updatedWeight;
+        for (int layerId = 0; layerId < numberOfLayers + 1; layerId++)
+        {
+            for (int neuronId = 0; neuronId < layerSize.get(layerId); neuronId++)
+            {
+                currentNeuron = layers.get(layerId).get(neuronId);
+                currentNeuron.biasWeight -= LEARNING_RATE * currentNeuron.biasDerivative;
+                currentNeuron.biasDerivative = 0.0;
+    
+                for (int weight_idx = 0; weight_idx < layerSize.get(layerId + 1); weight_idx++)
+                {
+                    updatedWeight = currentNeuron.weights.get(weight_idx)
+                        - LEARNING_RATE * currentNeuron.derivatives.get(weight_idx);
+
+                    currentNeuron.weights.set(weight_idx, updatedWeight);
+                    currentNeuron.derivatives.set(weight_idx, 0.0);
+                }	
+            }
+        }
     }
 
     public void printLayerInfo(){
