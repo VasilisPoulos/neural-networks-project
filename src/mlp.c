@@ -6,30 +6,30 @@
 #include "utility.h"
 
 #define D 2
-#define H1 2
-#define H2 2
-#define H3 2
-#define K 2
-#define LEARNGING_RATE 0.0001
+#define H1 4
+#define H2 4
+#define H3 4
+#define K 4
+#define LEARNGING_RATE 0.0000001
 #define BATCH_SIZE 1
 #define MINIMUM_EPOCHS 700
 #define TERMINATION_THRESHOLD 0.1
  
 #define TANH(x) tanhf(x)
-#define RELU(x) x > 0 ? 1.0 : -1.0
+#define RELU(x) x > 0 ? x: 0
 #define SIG(x) 1/(1 + exp(-x))
 
 #define RELU_DERIVATIVE(x) x > 0 ? 1.0 : 0.0
 #define SIG_DERIVATIVE(x) x*(1.0 - x)
 #define TANH_DERIVATIVE(x) 1.0 - (tanhf(x)*tanhf(x))
 
-#define HIDDEN_LAYER_ACT_FUNC(x) TANH(x)
+#define HIDDEN_LAYER_ACT_FUNC(x) RELU(x)
 #define OUTPUT_LAYER_ACT_FUNC(x) SIG(x)
 
-#define HIDDEN_LAYER_DERIVATIVE(x) TANH_DERIVATIVE(x)
+#define HIDDEN_LAYER_DERIVATIVE(x) RELU_DERIVATIVE(x)
 #define OUTPUT_LAYER_DERIVATIVE(x) SIG_DERIVATIVE(x) 
 
-#define NUM_OF_HIDDEN_LAYERS 2
+#define NUM_OF_HIDDEN_LAYERS 3
 #define NUM_OF_LAYERS NUM_OF_HIDDEN_LAYERS + 2
 #define BIAS 1
 
@@ -38,6 +38,7 @@ typedef struct{
 	float output;
 	float* weights;
 	float* derivatives;
+	float bias_derivative;
 	float bias_weight;
 	float error;
 }Neuron;
@@ -48,7 +49,7 @@ Neuron second_layer[H2];
 Neuron third_layer[H3]; 
 Neuron output_layer[K];
 Neuron* layers[NUM_OF_LAYERS];
-int* num_of_layer;
+int* layer_size;
 int _2layers[] = {D, H1, H2, K};
 int _3layers[] = {D, H1, H2, H3, K};
 
@@ -65,8 +66,8 @@ void test_network(float** test_dataset, int size_of_dataset);
 float output_category(float *output);
 
 int main(){
-	float** training_dataset = read_file("../data/easy_train.txt", LABELED_SET);
-	float** test_dataset = read_file("../data/easy_test.txt", LABELED_SET);
+	float** training_dataset = read_file("../data/training_set.txt", LABELED_SET);
+	float** test_dataset = read_file("../data/test_set.txt", LABELED_SET);
 	int training_set_len = get_file_len("../data/training_set.txt");
 
 	float array[] = {1, 1};
@@ -75,7 +76,6 @@ int main(){
 	data[0] = training_dataset[0][0];
 	data[1] = training_dataset[0][1];
 	float label = training_dataset[0][2];
-
 	srand(time(NULL));
 	initiate_network();
 	gradient_descent(training_dataset, 4000);
@@ -91,15 +91,15 @@ void initiate_network(){
 	if(NUM_OF_HIDDEN_LAYERS == 3){
 		layers[3] = third_layer;
 		layers[4] = output_layer;
-		num_of_layer = _3layers;
+		layer_size = _3layers;
 	}else{
 		layers[3] = output_layer;
-		num_of_layer = _2layers;
+		layer_size = _2layers;
 	}
 
 	for (size_t layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
-		for (size_t neuron_idx = 0; neuron_idx < num_of_layer[layer_idx]; neuron_idx++)
+		for (size_t neuron_idx = 0; neuron_idx < layer_size[layer_idx]; neuron_idx++)
 		{
 			Neuron neuron;
 			neuron.bias_weight = generate_random_float(-1, 1);
@@ -107,10 +107,10 @@ void initiate_network(){
 				neuron.weights = (float*) calloc(1, sizeof(float));
 				neuron.weights[0] = 1;
 			}else{
-				int weight_list_len = num_of_layer[layer_idx + 1];
+				int weight_list_len = layer_size[layer_idx + 1];
 				neuron.weights = (float*) calloc(weight_list_len, sizeof(float));
 				neuron.derivatives = (float*) calloc(weight_list_len, sizeof(float));
-				for (size_t i = 0; i < num_of_layer[layer_idx + 1]; i++)
+				for (size_t i = 0; i < layer_size[layer_idx + 1]; i++)
 				{
 					neuron.weights[i] = generate_random_float(-1, 1);
 				}
@@ -128,12 +128,12 @@ void print_layer_info(){
 		}else{
 			printf("----LAYER %d----\n", layer_idx + 1);
 		}
-		for (int neuron_idx = 0; neuron_idx < num_of_layer[layer_idx]; neuron_idx++)
+		for (int neuron_idx = 0; neuron_idx < layer_size[layer_idx]; neuron_idx++)
 		{
 			if((layer_idx == NUM_OF_LAYERS-1)){
 				printf("Neuron %d-1: %f\n", neuron_idx+1, layers[layer_idx][neuron_idx].weights[0]);	
 			}else{
-				for (int i = 0; i <  num_of_layer[layer_idx + 1]; i++)
+				for (int i = 0; i <  layer_size[layer_idx + 1]; i++)
 				{
 					printf("Neuron %d-%d: %f\n", neuron_idx+1, i+1, layers[layer_idx][neuron_idx].weights[i]);	
 				}
@@ -156,9 +156,8 @@ void forward_pass(float *x, float **y, int k){
 	Neuron* current_neuron;
 	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS; layer_idx++)
 	{
-		for (int neuron_idx = 0; neuron_idx < num_of_layer[layer_idx]; neuron_idx++)
-		{	
-			weighted_sum = 0.0;	
+		for (int neuron_idx = 0; neuron_idx < layer_size[layer_idx]; neuron_idx++)
+		{		
 			current_neuron = &layers[layer_idx][neuron_idx];
 			if(layer_idx == 0){
 				// For the first 'virtual' layer, the networks input is passed 
@@ -167,11 +166,12 @@ void forward_pass(float *x, float **y, int k){
 				current_neuron->output = current_neuron->input;
 			}else{
 				// For the hidden layers.
-				// Calculate the weighted sum of the previous layer.  
-				for (size_t previous_idx = 0; previous_idx < num_of_layer[layer_idx-1]; previous_idx++){
+				// Calculate the weighted sum of the previous layer.
+				weighted_sum = 0.0;  
+				for (size_t previous_idx = 0; previous_idx < layer_size[layer_idx - 1]; previous_idx++){
 					previous_neuron = layers[layer_idx - 1][previous_idx];
 					weighted_sum += \
-						previous_neuron.output * previous_neuron.weights[previous_idx];
+						previous_neuron.output * previous_neuron.weights[neuron_idx];
 				}
 				current_neuron->input = weighted_sum + current_neuron->bias_weight * BIAS;
 
@@ -189,35 +189,46 @@ void forward_pass(float *x, float **y, int k){
 
 void backprop(float *x, int d, float *t, int k){
 	Neuron* next_neuron;
-	Neuron* neuron;
-	float sum = 0.0;
+	Neuron* current_neuron;
+	float weighted_sum = 0.0;
 	float *y;
 	
 	forward_pass(x, &y, K);
 	calculate_output_error(t, k);
-	for (size_t hlayer_idx = NUM_OF_HIDDEN_LAYERS; hlayer_idx > 0; hlayer_idx--)
+	for (size_t hlayer_idx = NUM_OF_HIDDEN_LAYERS; hlayer_idx > -1; hlayer_idx--)
 	{
-		for (size_t neuron_idx = 0; neuron_idx < num_of_layer[hlayer_idx]; neuron_idx++)
+		for (size_t neuron_idx = 0; neuron_idx < layer_size[hlayer_idx]; neuron_idx++)
 		{	
-			sum = 0.0;
-			neuron = &layers[hlayer_idx][neuron_idx];
-			for (size_t weight_idx = 0; weight_idx < num_of_layer[hlayer_idx + 1]; weight_idx++)
+			weighted_sum = 0.0;
+			current_neuron = &layers[hlayer_idx][neuron_idx];
+
+			// Calculating error on previous layers' neurons.
+			for (size_t weight_idx = 0; weight_idx < layer_size[hlayer_idx + 1]; weight_idx++)
 			{
 				next_neuron = &layers[hlayer_idx + 1][weight_idx];
-				sum += neuron->weights[weight_idx] * next_neuron->error;  
+				weighted_sum += current_neuron->weights[weight_idx] * next_neuron->error;  
 			}		
-			neuron->error = HIDDEN_LAYER_DERIVATIVE(neuron->input) * sum;
+			current_neuron->error = HIDDEN_LAYER_DERIVATIVE(current_neuron->input) * weighted_sum;
+			
+			// Calculating partial derivatives.
+			current_neuron->bias_derivative += current_neuron->error;
+
+			for (size_t weight_idx = 0; weight_idx < layer_size[hlayer_idx + 1]; weight_idx++)
+			{
+				next_neuron = &layers[hlayer_idx + 1][weight_idx];
+				current_neuron->derivatives[weight_idx] += current_neuron->output * next_neuron->error;
+			}
 		}		
 	}	
 }
 
 void calculate_output_error(float *t, int k){
-	Neuron neuron;
-	for (size_t neuron_idx = 0; neuron_idx < num_of_layer[NUM_OF_LAYERS]; neuron_idx++)
+	Neuron *neuron;
+	for (size_t neuron_idx = 0; neuron_idx < layer_size[NUM_OF_LAYERS - 1]; neuron_idx++)
 	{
-		neuron = layers[NUM_OF_LAYERS - 1][neuron_idx];
-		layers[NUM_OF_LAYERS - 1][neuron_idx].error = \
-			OUTPUT_LAYER_DERIVATIVE(neuron.output) * (neuron.output - t[neuron_idx]);
+		neuron = &layers[NUM_OF_LAYERS - 1][neuron_idx];
+		neuron->error = \
+			OUTPUT_LAYER_DERIVATIVE(neuron->output) * (neuron->output - t[neuron_idx]);
 	}	
 }
 
@@ -226,23 +237,21 @@ void covert_label_to_array(float* array, int label){
 }
 
 void update_weights(){
-	float partial_derivative = 0.0;
-	float bias_partial_derivative = 0.0;
 	Neuron *currect_neuron;
 	Neuron *prev_layer_neuron;
-	for (int layer_idx = 1; layer_idx < NUM_OF_LAYERS; layer_idx++)
+	for (int layer_idx = 0; layer_idx < NUM_OF_LAYERS - 1; layer_idx++)
 	{
-		for (int neuron_idx = 0; neuron_idx < num_of_layer[layer_idx]; neuron_idx++)
+		for (int neuron_idx = 0; neuron_idx < layer_size[layer_idx]; neuron_idx++)
 		{
 			currect_neuron = &layers[layer_idx][neuron_idx];
-			bias_partial_derivative = currect_neuron->error;
-			currect_neuron->bias_weight -= LEARNGING_RATE * bias_partial_derivative;
+			currect_neuron->bias_weight -= LEARNGING_RATE * currect_neuron->bias_derivative;
+			currect_neuron->bias_derivative = 0.0;
 
-			for (int weight_idx = 0; weight_idx < num_of_layer[layer_idx - 1]; weight_idx++)
+			for (int weight_idx = 0; weight_idx < layer_size[layer_idx]; weight_idx++)
 			{
-				prev_layer_neuron = &layers[layer_idx - 1][weight_idx];
-				partial_derivative = prev_layer_neuron->output * currect_neuron->error;
-				prev_layer_neuron->weights[weight_idx] -= LEARNGING_RATE * partial_derivative;
+				currect_neuron->weights[weight_idx] \
+					-= LEARNGING_RATE * currect_neuron->derivatives[weight_idx];
+				currect_neuron->derivatives[weight_idx] = 0.0;
 			}	
 		}
 	}
@@ -271,7 +280,6 @@ void gradient_descent(float** training_dataset, int size_of_dataset){
 			if(i % BATCH_SIZE == 0){
 				update_weights();
 			}	
-			
 			total_error += square_error(label_array);
 		}
 		
@@ -311,6 +319,8 @@ void test_network(float** test_dataset, int size_of_dataset){
 		data[1] = test_dataset[i][1];
 		forward_pass(data, &output, 2);
 		category = output_category(output);
+
+		printf("%f	%f	%f	%f	%f\n", output[0], output[1], output[2], output[3], category);
 		if(category == test_dataset[i][2]){
 			correct++;
 		}
