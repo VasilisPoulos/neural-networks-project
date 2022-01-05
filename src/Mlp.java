@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.lang.Math;
 
 public class Mlp {
     int numberOfLayers;
@@ -36,10 +37,57 @@ public class Mlp {
             System.exit(-1);
         }
     }
+
+    public void initWeights(){
+        int numOfnextLayerNeurons;
+        double randomWeight = 0.0;
+        for (int layerId = 0; layerId < numberOfLayers + 1; layerId++)
+        {
+            numOfnextLayerNeurons = layers.get(layerId + 1).size();
+
+            for (Neuron neuron: layers.get(layerId)){
+                for (int weightId = 0; weightId < numOfnextLayerNeurons; weightId++) {
+                    randomWeight = getRandomNumber(-1, 1);
+                    neuron.weights.add(randomWeight);
+                }
+            }
+        }
+        for (Neuron neuron: layers.get(numberOfLayers + 1)){
+            neuron.weights.add(1.0);
+        }
+    }
+
+    private double getRandomNumber(double lower, double upper){
+        return Math.random() * (upper - lower) + lower;
+    }
+
+    public void printLayerInfo(){
+        int numOfNeurons;
+        Neuron neuron;
+        for (int layerId = 0; layerId < numberOfLayers + 2; layerId++)
+        {
+            if (layerId == numberOfLayers + 1){
+                System.out.println("------OUTPUT LAYER------");
+            }else{
+                System.out.println("------LAYER " + layerId + "------");
+            }
+
+            numOfNeurons = layers.get(layerId).size();
+            for (int neuronId = 0; neuronId < numOfNeurons; neuronId++){
+                System.out.println("Neuron " + neuronId);
+                neuron = layers.get(layerId).get(neuronId);
+                System.out.print("Weights: " + neuron.weights + "\n");
+                System.out.println();
+            }
+            System.out.println();
+        }
+    }
+
     public static void main(String[] args) {
 
         Mlp mlp = new Mlp(2);
-        Neuron n1 = new Neuron();
-        System.out.println(mlp.layers);
+
+        mlp.initWeights();
+        mlp.printLayerInfo();
     }
 }
