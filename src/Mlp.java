@@ -213,6 +213,47 @@ public class Mlp {
         }
     }
 
+    public double squareError(double data_label[]){
+        Neuron currentNeuron;
+        double outputError = 0.0;
+        for (int hiddenLayerId = numberOfLayers; hiddenLayerId > 0; hiddenLayerId--) {
+            for (int neuronId = 0; neuronId < layerSize.get(hiddenLayerId); neuronId++) {
+                currentNeuron = layers.get(hiddenLayerId).get(neuronId);
+                outputError += Math.pow((data_label[neuronId] - currentNeuron.error), 2);
+            }
+        }
+        return outputError;
+    }
+
+    float output_category(double output[]){
+        int category = 0;
+        double value = 0.0;
+        for (int i = 0; i < K; i++)
+        {
+            if(output[i] > value){
+                category = i;
+                value = output[i];
+            }
+        }
+        return (float) category + 1;
+    }
+
+    public void testNetwork(double test_dataset[][],int size_of_dataset,double output[]){
+        double category = 0.0;
+        int correct = 0;
+        ArrayList<Double> data = new ArrayList<>();
+        for (int i = 0; i < size_of_dataset; i++)
+        {
+            data.set(0,test_dataset[i][0]);
+            data.set(1,test_dataset[i][1]);
+            forwardPass(output);
+            category = output_category(output);
+            if(category == test_dataset[i][2]){
+                correct++;
+            }
+        }
+    }
+
     public static void main(String[] args) {
 
         Mlp mlp = new Mlp(2);
