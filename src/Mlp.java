@@ -41,19 +41,60 @@ public class Mlp {
     }
 
     private double relu(double input){
-        return ((input > 0) ? input : 0);
+        return input > 0 ? input : 0;
+    }
+
+    private double relu_derivative(double input){
+        return input > 0 ? 1.0 : 0.0;
     }
 
     private double sig(double input){
         return 1/(1 + Math.exp(- input));
     }
 
+    private double sig_derivative(double input){
+        return input * (1.0 - input);
+    }
+
+    private double getRandomNumber(double lower, double upper){
+        return Math.random() * (upper - lower) + lower;
+    }
+
     private double hiddenLayerFunction(double input){
         return relu(input);
     }
 
+    private double hiddenLayerDerivative(double input){
+        return relu_derivative(input);
+    }
+
     private double outputLayerFunction(double input){
         return sig(input);
+    }
+
+    private double outputLayerDerivative(double input){
+        return sig_derivative(input);
+    }
+
+    public void initWeights(){
+        int numOfnextLayerNeurons;
+        double randomWeight = 0.0;
+        for (int layerId = 0; layerId < numberOfLayers + 1; layerId++)
+        {
+            numOfnextLayerNeurons = layers.get(layerId + 1).size();
+
+            for (Neuron neuron: layers.get(layerId)){
+                neuron.biasWeight = getRandomNumber(-1, 1);
+                for (int weightId = 0; weightId < numOfnextLayerNeurons; weightId++) {
+                    randomWeight = getRandomNumber(-1, 1);
+                    neuron.weights.add(randomWeight);
+                }
+            }
+        }
+        for (Neuron neuron: layers.get(numberOfLayers + 1)){
+            neuron.weights.add(1.0);
+            neuron.biasWeight = getRandomNumber(-1, 1);
+        }
     }
 
     private double[] forwardPass(double networkInput[]){
@@ -85,7 +126,6 @@ public class Mlp {
 
                     //Use the activation function to calculate the output of the current neuron.
                     if(layerId == numberOfLayers + 1){
-                        System.out.println("AAXXAXAAXXAXAAXAX" +neuronId);
                         currentNeuron.output =
                                 outputLayerFunction(currentNeuron.input + currentNeuron.biasWeight * BIAS);
                         networkOutput[neuronId] = currentNeuron.output;
@@ -99,29 +139,53 @@ public class Mlp {
         return networkOutput;
     }
 
-    public void initWeights(){
-        int numOfnextLayerNeurons;
-        double randomWeight = 0.0;
-        for (int layerId = 0; layerId < numberOfLayers + 1; layerId++)
+    private void backprop(double networkInput[], int data_label[]){
+
+        Neuron lastNeuron;
+        Neuron currentNeuron;
+        Neuron nextNeuron;
+        double weightedSum;
+
+        forwardPass(networkInput);
+        printLayerInfo();
+
+        // Last layer error calculation.
+        for (int neuronId = 0; neuronId < layerSize.get(numberOfLayers + 1); neuronId++)
         {
-            numOfnextLayerNeurons = layers.get(layerId + 1).size();
+            lastNeuron = layers.get(numberOfLayers + 1).get(neuronId);
+            lastNeuron.error = 
+                outputLayerDerivative(lastNeuron.output) 
+                    * (lastNeuron.output - data_label[neuronId]);
+        }	
 
-            for (Neuron neuron: layers.get(layerId)){
-                neuron.biasWeight = getRandomNumber(-1, 1);
-                for (int weightId = 0; weightId < numOfnextLayerNeurons; weightId++) {
-                    randomWeight = getRandomNumber(-1, 1);
-                    neuron.weights.add(randomWeight);
+        for (int hiddenLayerId = numberOfLayers; hiddenLayerId > 0; hiddenLayerId--)
+        {
+            for (int neuronId = 0; neuronId < layerSize.get(hiddenLayerId); neuronId++)
+            {	
+                weightedSum = 0.0;
+                currentNeuron = layers.get(hiddenLayerId).get(neuronId);
+    
+                // Calculating error on previous layers' neurons.
+                for (int weightId = 0; weightId < layerSize.get(hiddenLayerId + 1); weightId++)
+                {
+                    nextNeuron = layers.get(hiddenLayerId + 1).get(weightId);
+                    weightedSum += currentNeuron.weights.get(weightId) * nextNeuron.error;  
+                }		
+                currentNeuron.error = hiddenLayerDerivative(currentNeuron.input) * weightedSum;
+                
+                // Calculating partial derivatives.
+                currentNeuron.biasDerivative += currentNeuron.error;
+                double updatedDerivative = 0.0;
+                for (int weightId = 0; weightId < layerSize.get(hiddenLayerId + 1); weightId++)
+                {
+                    nextNeuron = layers.get(hiddenLayerId + 1).get(weightId);
+                    updatedDerivative = 
+                        currentNeuron.derivatives.get(weightId) 
+                        + currentNeuron.output * nextNeuron.error;
+                    currentNeuron.derivatives.set(weightId, updatedDerivative);
                 }
-            }
-        }
-        for (Neuron neuron: layers.get(numberOfLayers + 1)){
-            neuron.weights.add(1.0);
-            neuron.biasWeight = getRandomNumber(-1, 1);
-        }
-    }
-
-    private double getRandomNumber(double lower, double upper){
-        return Math.random() * (upper - lower) + lower;
+            }		
+        }	
     }
 
     public void printLayerInfo(){
@@ -153,12 +217,9 @@ public class Mlp {
 
         Mlp mlp = new Mlp(2);
         mlp.initWeights();
-
-        double input[] = {0.161762, -0.797997};
-        double[] output =  mlp.forwardPass(input);
+        int label[] = {0, 1, 0, 0};
+        double input[] = {-0.911440, 0.186664};
+        mlp.backprop(input, label);
         mlp.printLayerInfo();
-        System.out.println(Arrays.toString(output));
-
-        //System.out.println(mlp.relu(1.0) + " " + mlp.relu(-1.0));
     }
 }
