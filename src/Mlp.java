@@ -61,7 +61,7 @@ public class Mlp {
         double weights = 0;
         Neuron previousNeuron;
         Neuron currentNeuron;
-        ArrayList<Double> networkOutput;
+        ArrayList<Double> networkOutput = new ArrayList<>();
 
         for (int layerId = 0; layerId < numberOfLayers; layerId++)
         {
@@ -93,8 +93,8 @@ public class Mlp {
                     }
                 }
             }
-            }
         }
+        return networkOutput;
     }
 
     public void initWeights(){
