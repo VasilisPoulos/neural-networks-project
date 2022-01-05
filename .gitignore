@@ -4,3 +4,4 @@ run
 *.pdf
 ../out/*.txt
 ../data/*.txt
+*.class

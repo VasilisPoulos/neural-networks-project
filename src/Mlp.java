@@ -57,11 +57,9 @@ public class Mlp {
 
     private ArrayList<Double> forwardPass(ArrayList<Double> networkInput){
         double weightedSum = 0;
-        double input = 0;
-        double weights = 0;
         Neuron previousNeuron;
         Neuron currentNeuron;
-        ArrayList<Double> networkOutput;
+        ArrayList<Double> networkOutput = new ArrayList<>();
 
         for (int layerId = 0; layerId < numberOfLayers; layerId++)
         {
@@ -93,13 +91,16 @@ public class Mlp {
                     } 	
                 }	 
             }
-            }
         }
+        return networkOutput;
     }
-    public static void main(String[] args) {
 
+    public static void main(String[] args) {
         Mlp mlp = new Mlp(2);
-        Neuron n1 = new Neuron();
-        System.out.println(mlp.layers);
+        ArrayList<Double> input = new ArrayList<>();
+        input.add(1.2);
+        input.add(1.3);
+        ArrayList<Double> output = mlp.forwardPass(input);
+        System.out.println(output);
     }
 }
