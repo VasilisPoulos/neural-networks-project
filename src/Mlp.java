@@ -7,14 +7,14 @@ import java.util.Scanner;
 public class Mlp {
     int numberOfLayers;
     int D = 2;
-    int H1 = 2;
-    int H2 = 2;
-    int H3 = 2;
+    int H1 = 10;
+    int H2 = 8;
+    int H3 = 4;
     int K = 4;
     int BIAS = 1;
     ArrayList<Integer> layerSize = new ArrayList<>();
-    double LEARNING_RATE = 0.01;
-    int BATCH_SIZE = 4000;
+    double LEARNING_RATE = 0.005;
+    int BATCH_SIZE = 1;
     int MINIMUM_EPOCHS = 700;
     double TERMINATION_THRESHOLD = 0.1;
     ArrayList<ArrayList<Neuron>> layers = new ArrayList<>();
@@ -156,7 +156,6 @@ public class Mlp {
         double updatedDerivative;
 
         forwardPass(networkInput);
-        printLayerInfo();
 
         // Last layer error calculation.
         for (int neuronId = 0; neuronId < layerSize.get(numberOfLayers + 1); neuronId++)
@@ -250,16 +249,15 @@ public class Mlp {
     public double squareError(double data_label[]){
         Neuron currentNeuron;
         double outputError = 0.0;
-        for (int hiddenLayerId = numberOfLayers; hiddenLayerId > 0; hiddenLayerId--) {
-            for (int neuronId = 0; neuronId < layerSize.get(hiddenLayerId); neuronId++) {
-                currentNeuron = layers.get(hiddenLayerId).get(neuronId);
-                outputError += Math.pow((data_label[neuronId] - currentNeuron.error), 2);
-            }
+        for (int neuronId = 0; neuronId < K; neuronId++) {
+            currentNeuron = layers.get(numberOfLayers+1).get(neuronId);
+            outputError += Math.pow((data_label[neuronId] - currentNeuron.error), 2);
         }
+
         return outputError;
     }
 
-    float output_category(double output[]){
+    private double outputCategory(double output[]){
         int category = 0;
         double value = 0.0;
         for (int i = 0; i < K; i++)
@@ -269,24 +267,24 @@ public class Mlp {
                 value = output[i];
             }
         }
-        return (float) category + 1;
+        return (float) category;
     }
 
-    public void testNetwork(double test_dataset[][],int size_of_dataset,double output[]){
-        double category = 0.0;
-        int correct = 0;
-        ArrayList<Double> data = new ArrayList<>();
-        for (int i = 0; i < size_of_dataset; i++)
-        {
-            data.set(0,test_dataset[i][0]);
-            data.set(1,test_dataset[i][1]);
-            forwardPass(output);
-            category = output_category(output);
-            if(category == test_dataset[i][2]){
-                correct++;
-            }
-        }
-    }
+//    public void testNetwork(double test_dataset[][],int size_of_dataset,double output[]){
+//        double category = 0.0;
+//        int correct = 0;
+//        ArrayList<Double> data = new ArrayList<>();
+//        for (int i = 0; i < size_of_dataset; i++)
+//        {
+//            data.set(0,test_dataset[i][0]);
+//            data.set(1,test_dataset[i][1]);
+//            forwardPass(output);
+//            category = output_category(output);
+//            if(category == test_dataset[i][2]){
+//                correct++;
+//            }
+//        }
+//    }
 
     private ArrayList<Double[]> readFile(String fileName){
         ArrayList<Double[]> dataSetArray = new ArrayList<>();
@@ -312,13 +310,81 @@ public class Mlp {
         return dataSetArray;
     }
 
-    public static void main(String[] args) {
+    private void testNetwork(){
+        ArrayList<Double[]> testDataSet = readFile("data/test_set.txt");
+        double[] inputData = new double[2];
+        double[] output;
+        double category;
+        int correct = 0;
+        for (Double[] data: testDataSet) {
+            inputData[0] = data[0];
+            inputData[1] = data[1];
+            output = forwardPass(inputData);
+            category = outputCategory(output);
+            if(category == data[2]){
+                correct++;
+            }
+        }
+        System.out.println("Correct: " + correct);
+    }
 
-        Mlp mlp = new Mlp(2);
+    private double[] covertLabelToArray(double label){
+        double[] labelArray = new double[K];
+        for (double num: labelArray) {
+            num = 0;
+        }
+
+        labelArray[(int)label] = 1;
+        return labelArray;
+    }
+
+    private void gradientDescent(ArrayList<Double[]> trainingDataset){
+        double[] data = new double[D];
+        double[] labelArray = new double[K];
+        double total_error = 0.0;
+        double previous_total_error = 0.0;
+        int epoch = 0;
+
+        while(true)
+        {
+
+            total_error = 0.0;
+            for (int i = 0; i < 4000; i++)
+            {
+                labelArray = covertLabelToArray(trainingDataset.get(i)[2]);
+                data[0] = trainingDataset.get(i)[0];
+                data[1] = trainingDataset.get(i)[1];
+                backprop(data, labelArray);
+
+                if(i % BATCH_SIZE == 0){
+                    update_weights();
+                }
+                total_error += squareError(labelArray);
+            }
+
+            total_error = 0.5 * total_error;
+
+            System.out.println("Epoch " + epoch + " Error: " + total_error);
+            epoch++;
+            if(epoch > MINIMUM_EPOCHS && Math.abs(previous_total_error - total_error)< TERMINATION_THRESHOLD ){
+                break;
+            }
+            previous_total_error = total_error;
+
+        }
+        //printLayerInfo();
+    }
+
+    public static void main(String[] args) {
+        Mlp mlp = new Mlp(3);
+        ArrayList<Double[]> trainingSet = mlp.readFile("data/training_set.txt");
         mlp.initWeights();
         double label[] = {0.0, 1.0, 0.0, 0.0};
         double input[] = {-0.911440, 0.186664};
-        mlp.backprop(input, label);
-        mlp.printLayerInfo();
+        //mlp.backprop(input, label);
+        //mlp.printLayerInfo();
+        mlp.gradientDescent(trainingSet);
+        mlp.testNetwork();
+
     }
 }
