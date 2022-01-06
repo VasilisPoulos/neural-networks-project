@@ -111,7 +111,7 @@ public class Mlp {
             total_error = 0.5 * total_error;
             errorArray.add(String.valueOf(total_error));
 
-            System.out.print("Epoch " + epoch + " Error: " + total_error + "\r");
+            System.out.println("Epoch " + epoch + " Error: " + total_error);
             epoch++;
             if(epoch > minimumEpochs && Math.abs(previous_total_error - total_error)< terminationThreshold){
                 break;
@@ -256,7 +256,7 @@ public class Mlp {
         double[] inputData = new double[2];
         double[] output;
         double category;
-        int incorrect = 0;
+        int correct = 0;
         double errorPercentage;
         for (Double[] data: testDataSet) {
             inputData[0] = data[0];
@@ -264,16 +264,16 @@ public class Mlp {
             output = forwardPass(inputData);
             category = outputCategory(output);
             line = data[0] + " " + data[1];
-            if(category != data[2]){
-                incorrect++;
+            if(category == data[2]){
+                correct++;
                 line = line + " +";
             }else{
                 line = line + " -";
             }
             results.add(line);
         }
-        errorPercentage = ((double)incorrect/(double)testDataSet.size())* 100;
-        System.out.printf("\nGeneralization Error: %.3f%%\n", errorPercentage);
+        errorPercentage = ((double)correct/(double)testDataSet.size())* 100;
+        System.out.printf("\nCorrect: %.3f%%\n", errorPercentage);
 
         writeToFile(results, "../../out/mpl_output.txt");
     }
