@@ -5,9 +5,9 @@ public class runMlp {
         int D = 2;
         int H1 = 10;
         int H2 = 8;
-        int H3 = 4; // Ignored if numOfHiddenLayers == 2
+        int H3 = 8; // Ignored if numOfHiddenLayers == 2
         int K = 4;
-        double LEARNING_RATE = 0.005;
+        double LEARNING_RATE = 0.0009;
         int BATCH_SIZE = 1;
         int MINIMUM_EPOCHS = 700;
         double TERMINATION_THRESHOLD = 0.1;

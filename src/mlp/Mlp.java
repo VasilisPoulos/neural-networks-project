@@ -89,7 +89,7 @@ public class Mlp {
         double total_error;
         double previous_total_error = 0.0;
         int epoch = 0;
-        ArrayList<Double> errorArray = new ArrayList<>();
+        ArrayList<String> errorArray = new ArrayList<>();
         ArrayList<Double[]> trainingDataset = readFile(fileName);
         while(true)
         {
@@ -109,9 +109,9 @@ public class Mlp {
             }
 
             total_error = 0.5 * total_error;
-            errorArray.add(total_error);
+            errorArray.add(String.valueOf(total_error));
 
-            System.out.println("Epoch " + epoch + " Error: " + total_error);
+            System.out.print("Epoch " + epoch + " Error: " + total_error + "\r");
             epoch++;
             if(epoch > minimumEpochs && Math.abs(previous_total_error - total_error)< terminationThreshold){
                 break;
@@ -119,7 +119,7 @@ public class Mlp {
             previous_total_error = total_error;
 
         }
-        writeToFile(errorArray);
+        writeToFile(errorArray, "../../out/mpl_error.txt");
         //printLayerInfo();
 
     }
@@ -251,6 +251,8 @@ public class Mlp {
 
     public void testNetwork(String fileName){
         ArrayList<Double[]> testDataSet = readFile(fileName);
+        ArrayList<String> results = new ArrayList<>();
+        String line;
         double[] inputData = new double[2];
         double[] output;
         double category;
@@ -261,12 +263,19 @@ public class Mlp {
             inputData[1] = data[1];
             output = forwardPass(inputData);
             category = outputCategory(output);
+            line = data[0] + " " + data[1];
             if(category != data[2]){
                 incorrect++;
+                line = line + " +";
+            }else{
+                line = line + " -";
             }
+            results.add(line);
         }
         errorPercentage = ((double)incorrect/(double)testDataSet.size())* 100;
         System.out.printf("\nGeneralization Error: %.3f%%\n", errorPercentage);
+
+        writeToFile(results, "../../out/mpl_output.txt");
     }
 
     private double sig(double input){
@@ -379,13 +388,13 @@ public class Mlp {
         return dataSetArray;
     }
 
-    private void writeToFile(ArrayList<Double> dataArray){
+    private void writeToFile(ArrayList<String> dataArray, String fileName){
         try {
-            File errorFile = new File("../../out/mpl_error.txt");
-            if (errorFile.createNewFile()) {
-                System.out.println("\nFile created: " + errorFile.getName());
+            File file = new File(fileName);
+            if (file.createNewFile()) {
+                System.out.println("\nFile created: " + file.getName());
             } else {
-                System.out.println("\n" + errorFile.getName() + " already exists. Updated File");
+                System.out.println("\n" + file.getName() + " already exists. Updated File");
             }
         } catch (IOException e) {
             System.out.println("An error occurred.");
@@ -393,11 +402,11 @@ public class Mlp {
         }
 
         try {
-            FileWriter errorWriter = new FileWriter("../../out/mpl_error.txt");
-            for (Double line: dataArray) {
-                errorWriter.write(String.valueOf(line) + "\n");
+            FileWriter writer = new FileWriter(fileName);
+            for (String line: dataArray) {
+                writer.write(String.valueOf(line) + "\n");
             }
-            errorWriter.close();
+            writer.close();
             System.out.println("Successfully wrote to the file.");
         } catch (IOException e) {
             System.out.println("An error occurred.");
