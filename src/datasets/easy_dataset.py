@@ -1,7 +1,10 @@
 import random
+train_path = "../data/easy_train.txt"
+test_path = "../data/easy_test.txt"
+dataset_size = 4000
 
-f = open("../data/easy_train.txt", "w")
-for i in range(4000):
+f = open(train_path, "w")
+for i in range(dataset_size):
     label = 0
     x = random.uniform(-1, 1)
     y = random.uniform(-1, 1)
@@ -10,10 +13,8 @@ for i in range(4000):
     f.write("{}, {}, {}\n".format(x, y, label))
 f.close()
 
-    
-
-f = open("../data/easy_test.txt", "w")
-for i in range(4000):
+f = open(test_path, "w")
+for i in range(dataset_size):
     label = 0
     x = random.uniform(-1, 1)
     y = random.uniform(-1, 1)

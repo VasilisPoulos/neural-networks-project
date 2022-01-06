@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-# define LABELED_SET 1
+#include "utility.h"
 
 float generate_random_float(float lowest, float highest) {
 	float scale = rand() / (float) RAND_MAX;
@@ -102,4 +97,19 @@ float** read_file(char* filename, int type) {
         free(line);
     
     return dataset;
+}
+
+// Robert Jenkins' 96 bit Mix Function
+unsigned long mix(unsigned long a, unsigned long b, unsigned long c)
+{
+    a=a-b;  a=a-c;  a=a^(c >> 13);
+    b=b-c;  b=b-a;  b=b^(a << 8);
+    c=c-a;  c=c-b;  c=c^(b >> 13);
+    a=a-b;  a=a-c;  a=a^(c >> 12);
+    b=b-c;  b=b-a;  b=b^(a << 16);
+    c=c-a;  c=c-b;  c=c^(b >> 5);
+    a=a-b;  a=a-c;  a=a^(c >> 3);
+    b=b-c;  b=b-a;  b=b^(a << 10);
+    c=c-a;  c=c-b;  c=c^(b >> 15);
+    return c;
 }

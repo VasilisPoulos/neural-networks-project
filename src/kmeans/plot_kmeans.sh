@@ -1,4 +1,4 @@
 #!/bin/bash
-gcc kmeans.c utility.c -lm
+gcc run_kmeans.c kmeans.c utility.c -lm
 ./a.out
-python plot_dataset.py ../out/labeled_data.txt ../out/kmeans_clusters.txt
+python ../datasets/plot_dataset.py ../../out/SEL_labeled_data.txt ../../out/SEL_kmeans_clusters.txt

@@ -1,50 +1,8 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "utility.h"
+#include "kmeans.h"
 
-#define NUM_OF_CLUSTERS 10
-// When comparing distances we can omit the square root of the euclidean 
-// distance function and we can make it into a macro so we don'thave to pay for 
-// function call overhead.
-#define EUCLIDEAN(dx,dy) sqrt((dx*dx)+(dy*dy))
-#define LEN_2D(x)  (sizeof(x[0]) / sizeof(x[0][0]))
-
-typedef struct {
-	double	x;
-	double	y;
-	int		group;
-} Cluster;
-
-typedef struct {
-    double error;
-    double x;
-    double y;
-} Kmeans;
-
-Kmeans kmeans_data[NUM_OF_CLUSTERS];
-
-Cluster cluster_list[NUM_OF_CLUSTERS];
-void intialize_clusters(Cluster* cluster_list, float** dataset, \
-    int len_of_dataset);
-void reset_array(float array[NUM_OF_CLUSTERS][3]);
-void set_labels(float** dataset, int len_of_dataset);
-void reposition_cluster_centers(float** dataset, \
-    float cluster_sum_info[NUM_OF_CLUSTERS][3], \
-    Cluster* cluster_list, int len_of_dataset);
-int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]);
-void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_list, \
-    int epoch);
-void write_labeled_dataset_to_file(char* filename, float** dataset, int len_dataset);
-void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list);
-float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset);
-//float kmeans(int num);
-Kmeans* kmeans(int num);
-
-void intialize_clusters(Cluster* cluster_list, float** dataset, int len_of_dataset){
-    srand(time(NULL)); 
+void intialize_clusters(float** dataset, int len_of_dataset){
+    unsigned long seed = mix(clock(), time(NULL), getpid());
+    srand(seed); 
     Cluster cluster;
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
@@ -90,9 +48,7 @@ void set_labels(float** dataset, int len_of_dataset){
     }
 }
     
-void reposition_cluster_centers(float** dataset, \
-    float cluster_sum_info[NUM_OF_CLUSTERS][3], \
-    Cluster* cluster_list, int len_of_dataset){
+void reposition_cluster_centers(float** dataset, float cluster_sum_info[NUM_OF_CLUSTERS][3], int len_of_dataset){
     int cluster_num = 0;
     for (size_t idx = 0; idx < len_of_dataset; idx++)
     {
@@ -112,7 +68,7 @@ void reposition_cluster_centers(float** dataset, \
     }
 }
 
-int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLUSTERS][2]){
+int clusters_converged(float previous_clusters[NUM_OF_CLUSTERS][2]){
     int cluster_conv_table[NUM_OF_CLUSTERS] = {0};
 
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
@@ -133,7 +89,7 @@ int clusters_converged(Cluster* cluster_list, float previous_clusters[NUM_OF_CLU
     return 1;
 }
 
-void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], Cluster* cluster_list, int epoch){
+void print_tables(float cluster_sum_info[NUM_OF_CLUSTERS][3], int epoch){
     printf("%d =================================\n", epoch);
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
     {
@@ -158,7 +114,7 @@ void write_labeled_dataset_to_file(char* filename, float** dataset, int len_data
     fclose(fp);
 }
 
-void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list){
+void write_kmeans_clusters_to_file(char* filename){
     FILE * fp;
     fp = fopen(filename, "w");
     for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
@@ -168,39 +124,40 @@ void write_kmeans_clusters_to_file(char* filename, Cluster* cluster_list){
     fclose(fp);
 }
 
-float* error_calc(Cluster* cluster_list, float** dataset, int len_of_dataset){ 
-    float *category_sum = (float*) calloc(NUM_OF_CLUSTERS, sizeof(float));
-
+float intra_cluster_variance(float** dataset, int len_of_dataset){ 
+    float intra_cluster_variance = 0.0;
+    float cluster_variance[NUM_OF_CLUSTERS] = {0};
     for (size_t idx = 0; idx < len_of_dataset; idx++) 
     {
         int label = dataset[idx][2];
         float dx = dataset[idx][0] - cluster_list[label].x; 
         float dy = dataset[idx][1] - cluster_list[label].y;
-        category_sum[label] +=  EUCLIDEAN(dx, dy);
+        cluster_variance[label] +=  EUCLIDEAN(dx, dy);
     }
-    return category_sum;
+
+    for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
+    {
+        intra_cluster_variance += cluster_variance[idx];
+    }
+    
+    return intra_cluster_variance;
 }
 
-
-Kmeans* kmeans(int num)
+float kmeans(char* filename, int max_iter)
 {  
-    char* filename = "../data/dataset2.txt";
     float** dataset;
+    float error = 0.0;
     dataset = read_file(filename, UNLABELED_SET);
     int len_dataset = get_file_len(filename);
-    //printf("Lines of data: %d \n", len_dataset);
-  
     float previous_clusters[NUM_OF_CLUSTERS][2] = {0};
     float cluster_sum_info[NUM_OF_CLUSTERS][3] = {0};
-    intialize_clusters(cluster_list, dataset, len_dataset);
-    //print_tables(cluster_sum_info, cluster_list, -1);
-    for (size_t epoch = 0; epoch < 50; epoch++)
+    intialize_clusters(dataset, len_dataset);
+    for (size_t epoch = 0; epoch < max_iter; epoch++)
     {
         reset_array(cluster_sum_info);
         set_labels(dataset, len_dataset);
-        reposition_cluster_centers(dataset, cluster_sum_info, cluster_list, len_dataset);
-        //print_tables(cluster_sum_info, cluster_list, epoch);
-        if(clusters_converged(cluster_list, previous_clusters) == 1){
+        reposition_cluster_centers(dataset, cluster_sum_info, len_dataset);
+        if(clusters_converged(previous_clusters) == 1){
             break;
         }
         for (size_t idx = 0; idx < NUM_OF_CLUSTERS; idx++)
@@ -210,24 +167,9 @@ Kmeans* kmeans(int num)
         }
         
     }
-    //print_tables(cluster_sum_info, cluster_list, -1);
-    write_labeled_dataset_to_file("../out/labeled_data.txt", dataset, len_dataset);
-    write_kmeans_clusters_to_file("../out/kmeans_clusters.txt", cluster_list);
-    float* error_table = error_calc(cluster_list, dataset, len_dataset);
-    float total_error = 0.0;
-    Kmeans temp_km;
-    for (int i = 0; i < NUM_OF_CLUSTERS; i++)
-    {   
-        total_error += error_table[i];
-        temp_km.error = error_table[i];
-        temp_km.x = cluster_list[i].x;
-        temp_km.y = cluster_list[i].y;
-        kmeans_data[i] = temp_km;       
-        //printf("Error: %f at cluster %d.\n", error_table[i], i);
-    }
-    printf("Total error: %f\n", total_error);
-    
+    write_labeled_dataset_to_file("../../out/labeled_data.txt", dataset, len_dataset);
+    write_kmeans_clusters_to_file("../../out/kmeans_clusters.txt");
+    error = intra_cluster_variance(dataset, len_dataset);
     free(dataset);
-    //return total_error;
-    return kmeans_data;
+    return error;
 }
