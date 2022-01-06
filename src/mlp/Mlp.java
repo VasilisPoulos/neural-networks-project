@@ -5,12 +5,12 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Mlp {
-    int numberOfLayers;
-    int D = 2;
-    int H1 = 10;
-    int H2 = 8;
-    int H3 = 4;
-    int K = 4;
+    private int numberOfLayers;
+    public int D = 2;
+    public int H1 = 10;
+    public int H2 = 8;
+    public int H3 = 4;
+    public int K = 4;
     int BIAS = 1;
     ArrayList<Integer> layerSize = new ArrayList<>();
     double LEARNING_RATE = 0.005;
@@ -18,6 +18,7 @@ public class Mlp {
     int MINIMUM_EPOCHS = 700;
     double TERMINATION_THRESHOLD = 0.1;
     ArrayList<ArrayList<Neuron>> layers = new ArrayList<>();
+    public String hiddenLayerActivationFunction;
 
     public Mlp(int numberOfLayers){
         this.numberOfLayers = numberOfLayers;
@@ -42,14 +43,6 @@ public class Mlp {
         }
     }
 
-    private double relu(double input){
-        return input > 0 ? input : 0;
-    }
-
-    private double relu_derivative(double input){
-        return input > 0 ? 1.0 : 0.0;
-    }
-
     private double sig(double input){
         return 1/(1 + Math.exp(- input));
     }
@@ -58,28 +51,32 @@ public class Mlp {
         return input * (1.0 - input);
     }
 
-    private double tanh_derivative(double input){
-        return 1.0 - (Math.tanh(input) * Math.tanh(input));
-    }
-
     private double getRandomNumber(double lower, double upper){
         return Math.random() * (upper - lower) + lower;
     }
 
     private double hiddenLayerFunction(double input){
-        return Math.tanh(input);
+        if (hiddenLayerActivationFunction.equals("relu")){
+            return input > 0 ? input : 0;
+        }else if(hiddenLayerActivationFunction.equals("tanh")){
+            return Math.tanh(input);
+        }else{
+            System.out.println("Unknown activation function!");
+            System.exit(-1);
+        }
+        return 0;
     }
 
     private double hiddenLayerDerivative(double input){
-        return tanh_derivative(input);
-    }
-
-    private double outputLayerFunction(double input){
-        return sig(input);
-    }
-
-    private double outputLayerDerivative(double input){
-        return sig_derivative(input);
+        if (hiddenLayerActivationFunction.equals("relu")){
+            return input > 0 ? 1.0 : 0.0;
+        }else if(hiddenLayerActivationFunction.equals("tanh")){
+            return 1.0 - (Math.tanh(input) * Math.tanh(input));
+        }else{
+            System.out.println("Unknown activation function!");
+            System.exit(-1);
+        }
+        return 0;
     }
 
     public void initWeights(){
@@ -135,7 +132,7 @@ public class Mlp {
                     //Use the activation function to calculate the output of the current neuron.
                     if(layerId == numberOfLayers + 1){
                         currentNeuron.output =
-                                outputLayerFunction(currentNeuron.input);
+                                sig(currentNeuron.input);
                         networkOutput[neuronId] = currentNeuron.output;
                     }else{
                         currentNeuron.output =
@@ -162,7 +159,7 @@ public class Mlp {
         {
             lastNeuron = layers.get(numberOfLayers + 1).get(neuronId);
             lastNeuron.error =
-                outputLayerDerivative(lastNeuron.output)
+                    sig_derivative(lastNeuron.output)
                     * (lastNeuron.output - data_label[neuronId]);
         }
 
@@ -270,7 +267,7 @@ public class Mlp {
         return (float) category;
     }
 
-    private ArrayList<Double[]> readFile(String fileName){
+    public ArrayList<Double[]> readFile(String fileName){
         ArrayList<Double[]> dataSetArray = new ArrayList<>();
         String[] lineSplit;
         try {
@@ -294,7 +291,7 @@ public class Mlp {
         return dataSetArray;
     }
 
-    private void testNetwork(){
+    public void testNetwork(){
         ArrayList<Double[]> testDataSet = readFile("../../data/test_set.txt");
         double[] inputData = new double[2];
         double[] output;
@@ -324,7 +321,7 @@ public class Mlp {
         return labelArray;
     }
 
-    private void gradientDescent(ArrayList<Double[]> trainingDataset){
+    public void gradientDescent(ArrayList<Double[]> trainingDataset){
         double[] data = new double[D];
         double[] labelArray;
         double total_error;
@@ -361,14 +358,4 @@ public class Mlp {
         //printLayerInfo();
     }
 
-    public static void main(String[] args) {
-        Mlp mlp = new Mlp(3);
-        ArrayList<Double[]> trainingSet = mlp.readFile("../../data/training_set.txt");
-        mlp.initWeights();
-        //mlp.backprop(input, label);
-        //mlp.printLayerInfo();
-        mlp.gradientDescent(trainingSet);
-        mlp.testNetwork();
-
-    }
 }
