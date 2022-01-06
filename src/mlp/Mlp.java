@@ -295,7 +295,7 @@ public class Mlp {
     }
 
     private void testNetwork(){
-        ArrayList<Double[]> testDataSet = readFile("data/test_set.txt");
+        ArrayList<Double[]> testDataSet = readFile("../../data/test_set.txt");
         double[] inputData = new double[2];
         double[] output;
         double category;
@@ -363,7 +363,7 @@ public class Mlp {
 
     public static void main(String[] args) {
         Mlp mlp = new Mlp(3);
-        ArrayList<Double[]> trainingSet = mlp.readFile("data/training_set.txt");
+        ArrayList<Double[]> trainingSet = mlp.readFile("../../data/training_set.txt");
         mlp.initWeights();
         //mlp.backprop(input, label);
         //mlp.printLayerInfo();
