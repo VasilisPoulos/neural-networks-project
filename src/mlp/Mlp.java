@@ -83,13 +83,14 @@ public class Mlp {
         }
     }
 
-    public void gradientDescent(ArrayList<Double[]> trainingDataset){
+    public void gradientDescent(String fileName){
         double[] data = new double[D];
         double[] labelArray;
         double total_error;
         double previous_total_error = 0.0;
         int epoch = 0;
         ArrayList<Double> errorArray = new ArrayList<>();
+        ArrayList<Double[]> trainingDataset = readFile(fileName);
         while(true)
         {
 
@@ -248,8 +249,8 @@ public class Mlp {
         return outputError;
     }
 
-    public void testNetwork(){
-        ArrayList<Double[]> testDataSet = readFile("../../data/test_set.txt");
+    public void testNetwork(String fileName){
+        ArrayList<Double[]> testDataSet = readFile(fileName);
         double[] inputData = new double[2];
         double[] output;
         double category;
