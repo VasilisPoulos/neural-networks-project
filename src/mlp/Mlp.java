@@ -103,7 +103,7 @@ public class Mlp {
                 backprop(data, labelArray);
 
                 if(i % batchSize == 0){
-                    update_weights();
+                    updateWeights();
                 }
                 total_error += squareError(labelArray);
             }
@@ -215,7 +215,7 @@ public class Mlp {
         return networkOutput;
     }
 
-    private void update_weights(){
+    private void updateWeights(){
         Neuron currentNeuron;
         double updatedWeight;
         for (int layerId = 0; layerId < numberOfHiddenLayers + 1; layerId++)
