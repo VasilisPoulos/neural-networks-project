@@ -8,13 +8,8 @@ Exercise for the elective course Neural Networks, CSE UOI.
 
 ## **Δημιουργία Συνόλων Δεδομένων**
 
-<<<<<<< HEAD
 Για την δημιουργία των συνόλων δεδομένων έχει δημιουργηθεί το αρχείο
 `generate_dataset.c` το οποίο με την εκτέλεση του δημιουργεί τα `training_set.txt`
-=======
-Για την δημιουργία των συνόλων δεδομένων έχει δημιουργηθεί το αρχείο 
-`generate_dataset.c`. Με την εκτέλεση του δημιουργεί τα `training_set.txt`
->>>>>>> c678cf1497c4281738e260242a4e14c66d02dd3e
 και `test_set.txt` για την εκπαίδευση και τον έλεγχο του νευρωνικoύ δικτύου της
 πρώτης άσκησης και το `dataset2.txt` για τον αλγόριθμο kmeans της δεύτερης άσκησης.
 
@@ -129,20 +124,21 @@ $java runMlp
 μικρότερο σφάλμα γενίκευσης:
 
 ```java
-        int numOfHiddenLayers = 2; // type "2" or "3"
-        int D = 2;
-        int H1 = 8;
-        int H2 = 6;
-        int H3 = 8; // Ignored if numOfHiddenLayers == 2
-        int K = 4;
-        String hiddenLayerActivationFunction = "tanh"; //type "relu" or "tanh"
-        double LEARNING_RATE = 0.01;
-        int BATCH_SIZE = 40;
-        int MINIMUM_EPOCHS = 700;
-        double TERMINATION_THRESHOLD = 0.1;
+int numOfHiddenLayers = 3; // type "2" or "3"
+int D = 2;
+int H1 = 10;
+int H2 = 10;
+int H3 = 8; // Ignored if numOfHiddenLayers == 2
+int K = 4;
+String hiddenLayerActivationFunction = "tanh"; //type "relu" or "tanh"
+double LEARNING_RATE = 0.003;
+int BATCH_SIZE = 1;
+int MINIMUM_EPOCHS = 700;
+double TERMINATION_THRESHOLD = 0.01;
 ```
 
-Correct = 85.4% Runtime = 15.21s
+Training runtime: 45.090sec
+Correct: 88.200%
 
 ### **Παρατηρήσεις**
 
@@ -166,10 +162,10 @@ Correct = 85.4% Runtime = 15.21s
 Χρησιμοποιώντας την υπερβολική εφαπτομένη ο χρόνος εκπαίδευσης αυξάνεται αρκετά επιτυγχάνοντας όμως
 υψηλότερη ικανότητα γενίκευσης και αποφεύγοντας το πρόβλημα που αναφέρθηκε παραπάνω.
 
-
 <ins>Μέγεθος mini-Batch</ins>
 
-
+Η αύξηση του μεγέθους mini-batch συμβάλλει στην μείωση του χρόνου εκπαίδευσης μειώνοντας ωστόσο
+και την γενικευτική ικανότητα του δικτύου.
 
 ## **Άσκηση 2**
 
