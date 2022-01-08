@@ -124,20 +124,21 @@ mlp.testNetwork("../../data/test_set.txt");
 μικρότερο σφάλμα γενίκευσης:
 
 ```java
-        int numOfHiddenLayers = 2; // type "2" or "3"
-        int D = 2;
-        int H1 = 8;
-        int H2 = 6;
-        int H3 = 8; // Ignored if numOfHiddenLayers == 2
-        int K = 4;
-        String hiddenLayerActivationFunction = "tanh"; //type "relu" or "tanh"
-        double LEARNING_RATE = 0.01;
-        int BATCH_SIZE = 40;
-        int MINIMUM_EPOCHS = 700;
-        double TERMINATION_THRESHOLD = 0.1;
+int numOfHiddenLayers = 3; // type "2" or "3"
+int D = 2;
+int H1 = 10;
+int H2 = 10;
+int H3 = 8; // Ignored if numOfHiddenLayers == 2
+int K = 4;
+String hiddenLayerActivationFunction = "tanh"; //type "relu" or "tanh"
+double LEARNING_RATE = 0.003;
+int BATCH_SIZE = 1;
+int MINIMUM_EPOCHS = 700;
+double TERMINATION_THRESHOLD = 0.01;
 ```
 
-Correct = 85.4% Runtime = 15.21s
+Training runtime: 45.090sec
+Correct: 88.200%
 
 ### **Παρατηρήσεις**
 
@@ -161,10 +162,10 @@ Correct = 85.4% Runtime = 15.21s
 Χρησιμοποιώντας την υπερβολική εφαπτομένη ο χρόνος εκπαίδευσης αυξάνεται αρκετά επιτυγχάνοντας όμως
 υψηλότερη ικανότητα γενίκευσης και αποφεύγοντας το πρόβλημα που αναφέρθηκε παραπάνω.
 
-
 <ins>Μέγεθος mini-Batch</ins>
 
-
+Η αύξηση του μεγέθους mini-batch συμβάλλει στην μείωση του χρόνου εκπαίδευσης μειώνοντας ωστόσο
+και την γενικευτική ικανότητα του δικτύου.
 
 ## **Άσκηση 2**
 
