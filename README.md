@@ -8,13 +8,8 @@ Exercise for the elective course Neural Networks, CSE UOI.
 
 ## **Δημιουργία Συνόλων Δεδομένων**
 
-<<<<<<< HEAD
 Για την δημιουργία των συνόλων δεδομένων έχει δημιουργηθεί το αρχείο
 `generate_dataset.c` το οποίο με την εκτέλεση του δημιουργεί τα `training_set.txt`
-=======
-Για την δημιουργία των συνόλων δεδομένων έχει δημιουργηθεί το αρχείο 
-`generate_dataset.c`. Με την εκτέλεση του δημιουργεί τα `training_set.txt`
->>>>>>> c678cf1497c4281738e260242a4e14c66d02dd3e
 και `test_set.txt` για την εκπαίδευση και τον έλεγχο του νευρωνικoύ δικτύου της
 πρώτης άσκησης και το `dataset2.txt` για τον αλγόριθμο kmeans της δεύτερης άσκησης.
 
@@ -68,17 +63,17 @@ $python plot_dataset.py ../../out/labeled_data.txt ../../out/kmeans_clusters.txt
 όπως φαίνεται παρακάτω:
 
 ```java
-        int numOfHiddenLayers = 3; // type "2" or "3"
-        int D = 2;
-        int H1 = 10;
-        int H2 = 8;
-        int H3 = 8; // Ignored if numOfHiddenLayers == 2
-        int K = 4;
-        String hiddenLayerActivationFunction = "tanh"; //type "relu" or "tanh"
-        double LEARNING_RATE = 0.0009;
-        int BATCH_SIZE = 1;
-        int MINIMUM_EPOCHS = 700;
-        double TERMINATION_THRESHOLD = 0.1;
+int numOfHiddenLayers = 3; // type "2" or "3"
+int D = 2;
+int H1 = 10;
+int H2 = 8;
+int H3 = 8; // Ignored if numOfHiddenLayers == 2
+int K = 4;
+String hiddenLayerActivationFunction = "tanh"; //type "relu" or "tanh"
+double LEARNING_RATE = 0.0009;
+int BATCH_SIZE = 1;
+int MINIMUM_EPOCHS = 700;
+double TERMINATION_THRESHOLD = 0.1;
 ```
 
 + Για την εκτέλεση: 
@@ -91,9 +86,9 @@ $java runMlp
 Κατά την εκτέλεση του προγράμματος καλούνται τρεις βασικές συναρτήσεις:
 
 ```java
-        mlp.initWeights();
-        mlp.gradientDescent("../../data/training_set.txt");
-        mlp.testNetwork("../../data/test_set.txt");
+mlp.initWeights();
+mlp.gradientDescent("../../data/training_set.txt");
+mlp.testNetwork("../../data/test_set.txt");
 ```
 
 + Με την `initWeights()` αρχικοποιούνται όλα τα βάρη και οι πολώσεις του δικτύου
