@@ -119,7 +119,7 @@ public class Mlp {
             previous_total_error = total_error;
 
         }
-        writeToFile(errorArray, "../../out/mpl_error.txt");
+        writeToFile(errorArray, "../../out/mlp_error.txt");
         //printLayerInfo();
 
     }
@@ -275,7 +275,7 @@ public class Mlp {
         errorPercentage = ((double)correct/(double)testDataSet.size())* 100;
         System.out.printf("\nCorrect: %.3f%%\n", errorPercentage);
 
-        writeToFile(results, "../../out/mpl_output.txt");
+        writeToFile(results, "../../out/mlp_output.txt");
     }
 
     private double sig(double input){
