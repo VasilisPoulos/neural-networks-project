@@ -60,10 +60,10 @@ $./a.out
 <p>Παραδείγματα εκτέλεσης:</p>
 <pre><code class="language-bash"><div><span class="hljs-variable">$python</span> plot_dataset.py ../../data/training_set.txt 
 </div></code></pre>
-<p><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/mlp_train_set.png" alt="mlp_train_set"></p>
+<p><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\mlp_train_set.png" alt="mlp_train_set"></p>
 <pre><code class="language-bash"><div><span class="hljs-variable">$python</span> plot_dataset.py ../../out/labeled_data.txt ../../out/kmeans_clusters.txt  
 </div></code></pre>
-<p><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/kmeans_3.png" alt="mlp_train_set"></p>
+<p><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\kmeans_3.png" alt="mlp_train_set"></p>
 <h2 id="σχόλια-υλοποίησης"><strong>Σχόλια Υλοποίησης</strong></h2>
 <p>Η αρχική υλοποίηση της εργαστηριακής άσκησης ήταν εξ'ολοκλήρου σε C. Λόγω
 κάποιου προβλήματος στον σχεδιασμό του MLP στην πρώτη άσκηση η τελική υλοποίηση
@@ -77,6 +77,7 @@ $./a.out
 <li><code>data</code>: τα απαραίτητα σύνολα δεδομένων για την εκτέλεση των προγραμμάτων.</li>
 <li><code>out</code>: αρχεία εξοδου των προγραμμάτων και επιλεγμένες έξοδοι απο τις εκτελέσεις
 με την καλύτερη απόδοση.</li>
+<li><code>src/datasets</code>: το αρχείο <code>plot_dataset.py</code> που αναφέρθηκε παραπάνω.</li>
 <li><code>src/mlp</code>: η υλοποίηση του mlp σε Java.</li>
 <li><code>src/kmeans</code>: η υλοποίηση του kmeans σε C. Σε αυτό τον φάκελο περιέχεται και
 το πρόγραμμα <code>generate_dataset.c</code> όπως αναφέρθηκε παραπάνω καθώς εξαρτάται απο
@@ -155,7 +156,14 @@ String hiddenLayerActivationFunction = <span class="hljs-string">&quot;tanh&quot
 <span class="hljs-keyword">int</span> MINIMUM_EPOCHS = <span class="hljs-number">700</span>;
 <span class="hljs-keyword">double</span> TERMINATION_THRESHOLD = <span class="hljs-number">0.01</span>;
 </div></code></pre>
-<p><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/best_performance_output.png" alt="best_run"></p>
+<ul>
+<li>Η έξοδος:</li>
+</ul>
+<p><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\best_performance_output.png" alt="best_run"></p>
+<ul>
+<li>Η καμπύλη του σφάλματος προς κάθε εποχή:</li>
+</ul>
+<p><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\error-epoch-plot.png" alt="error-epoch-plot"></p>
 <p>Τα αρχεία εξόδου της παραπάνω εκτέλεσης είναι αποθηκευμένα στον φάκελο <code>out</code> με
 ονόματα <code>mlp_error_final.txt</code> και <code>mlp_output_final.txt</code>.</p>
 <h3 id="παρατηρήσεις"><strong>Παρατηρήσεις</strong></h3>
@@ -208,24 +216,24 @@ String hiddenLayerActivationFunction = <span class="hljs-string">&quot;tanh&quot
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center"><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/kmeans_3.png" alt="kmeans3"> M = 3</td>
-<td style="text-align:center"><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/kmeans_5.png" alt="kmeans5"> M = 5</td>
+<td style="text-align:center"><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\kmeans_3.png" alt="kmeans3"> M = 3</td>
+<td style="text-align:center"><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\kmeans_5.png" alt="kmeans5"> M = 5</td>
 </tr>
 <tr>
-<td style="text-align:center"><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/kmeans_7.png" alt="kmeans7"> M = 7</td>
-<td style="text-align:center"><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/kmeans_9.png" alt="kmeans9"> M = 9</td>
+<td style="text-align:center"><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\kmeans_7.png" alt="kmeans7"> M = 7</td>
+<td style="text-align:center"><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\kmeans_9.png" alt="kmeans9"> M = 9</td>
 </tr>
 <tr>
-<td style="text-align:center"><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/kmeans_11.png" alt="kmeans11"> M = 11</td>
-<td style="text-align:center"><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/kmeans_13.png" alt="kmeans13"> M = 13</td>
+<td style="text-align:center"><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\kmeans_11.png" alt="kmeans11"> M = 11</td>
+<td style="text-align:center"><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\kmeans_13.png" alt="kmeans13"> M = 13</td>
 </tr>
 </tbody>
 </table>
 <p>Το καλύτερο σφάλμα ανα περίπτωση τυπώνεται στο τερματικό. Οι τιμές
 χρησιμοποιούνται για τον σχεδιασμό του γραφήματος που δείχνει την μεταβολή
 του σφάλματος ομαδοποίησης με τον αριθμό ομάδων.</p>
-<p><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/plot_min_values.png" alt="min-values"></p>
-<p><img src="file:////home/vasilisp/Desktop/neural-networks-project/images/chart.png" alt="elbow-method"></p>
+<p><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\plot_min_values.png" alt="min-values"></p>
+<p><img src="file:///c:\Users\greg2\IdeaProjects\neural-networks-project\images\chart.png" alt="elbow-method"></p>
 <p>Στο γράφημα μπορεί να παρατηρηθεί ότι ενώ αρχικά η μεταβολή του σφάλματος είναι
 μεγάλη, σταδιακά μικραίνει. Μετά τα 9 κεντρα η μεταβολή του σφάλματος είναι
 πλέον τόσο μικρή, που σε συνδυασμό με το αυξημένο κόστος, δεν
@@ -233,7 +241,8 @@ String hiddenLayerActivationFunction = <span class="hljs-string">&quot;tanh&quot
 με πολυ καλύτερο τρόπο τα δεδομένα. Αυτη η ευρετική μέθοδος ονομάζεται elbow η
 knee method. Είναι γνωστή στην ανάλυση συστάδων (clustering analysis) και βοηθάει
 στον εμπειρικό προσδιορισμό του πραγματικό αριθμού ομάδων σε ένα σύνολο
-δεδομένων.</p>
+δεδομένων. Άρα πράγματι μπορούμε να προσδιορίσουμε τον πραγματικό αριθμό ομάδων
+από το σφάλμα ομαδοποίησης.</p>
 
     </body>
     </html>
