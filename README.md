@@ -103,4 +103,99 @@ then uses the test data to calculate its accuracy. These three tasks are explain
                     results are written to the mlp_error.txt file.
 
 
+### Output Function
 
+The logistic function (sigmoid) is used for the output function of the network, as it is 
+used for classifying data into categories.  
+
+### Best Network Observed 
+
+These are the parameters that where used to achieve the smallest generalization error: 
+
+```java
+int numOfHiddenLayers = 3; // type "2" or "3"
+int D = 2;
+int H1 = 10;
+int H2 = 10;
+int H3 = 8; // Ignored if numOfHiddenLayers == 2
+int K = 4;
+String hiddenLayerActivationFunction = "tanh"; //type "relu" or "tanh"
+double LEARNING_RATE = 0.003;
+int BATCH_SIZE = 1;
+int MINIMUM_EPOCHS = 700;
+double TERMINATION_THRESHOLD = 0.01;
+```
+
++ The output: 
+
+![best_run](images/best_performance_output.png)
+
++ The curve of the error for each epoch: 
+
+![error-epoch-plot](images/error-epoch-plot.png)
+
+The output files of this execution are saved in the `out` directory as `mlp_error_final.txt` 
+and `mlp_output_final.txt`.
+
+### Results - Observations
+
+<ins>Changing the number of neurons in the hidden layers</ins>
+
+By changing the number of neurons in a network with two hidden layers, it was observed that
+increasing the number of neurons in the first layer has a greater impact on generalization 
+ability compared to increasing the number of neurons in the second hidden layer. Similarly, 
+in a network with three hidden layers, smaller changes are observed when changing the number 
+of neurons from the first to the third hidden layer. It should also be noted that adding the 
+third hidden layer did not result in significant benefits as it increased training time 
+without a significant increase in generalization ability.
+
+<ins>Activation Function</ins>
+
+Using the two activation functions, it was observed that using **relu** reduces the training 
+time of the network but also reduces its generalization ability. Additionally, there were 
+cases where many neurons stay inactive, meaning that they have continuous output of zero, 
+which hinders the training of the network. Using the **hyperbolic tangent** function 
+increases the training time significantly but achieves higher generalization ability and 
+avoids the problem that was mentioned above.
+
+<ins>Mini-Batch Size</ins>
+
+Increasing the size of the mini-batch contributes to reducing the training time of the network, 
+however, it reduces the generalization ability of the network as well.
+
+## K-means
+
+To execute k-means and display the results (plot), the `plot_kmeans.sh` bash script is used as follows:
+
+```bash
+$bash plot_kmeans.sh
+```
+
+The script will compile the necessary files to produce the executable, run k-means 20 times with randomly 
+selected initial centroids, keep the solution with the smallest clustering error, and then call 
+plot_dataset.py to display the result. The output files with the smallest clustering error are saved
+in the `SEL_*.txt` files.
+
+The above execution uses the `NUM_OF_CLUSTERS` variable, which defines the desired number of centroids, 
+and is defined with a define statement in the `kmeans.h` file and can be changed to any number.
+
+For M =  3, 5, 7, 9, 11, 13 we get the following results
+
+|                                          |                                          |
+|:----------------------------------------:|:----------------------------------------:|
+|  ![kmeans3](images/kmeans_3.png) M = 3   |  ![kmeans5](images/kmeans_5.png) M = 5   |
+|  ![kmeans7](images/kmeans_7.png) M = 7   |  ![kmeans9](images/kmeans_9.png) M = 9   |
+| ![kmeans11](images/kmeans_11.png) M = 11 | ![kmeans13](images/kmeans_13.png) M = 13 |
+
+The best error per case is printed on the terminal. The values are then used to plot 
+the change in clustering error with the number of clusters.
+
+![min-values](images/plot_min_values.png)
+
+![elbow-method](images/chart.png)
+
+### Result - Knee Method
+
+In the graph it can be observed that although initially the error variation is large, it gradually decreases.
+After 9 centers, the error variation is so small that, combined with the increased cost, it does not justify 
+the choice of more centers as they will not represent the data much better.
